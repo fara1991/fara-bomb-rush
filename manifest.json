@@ -1,0 +1,12 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "FaraBombRush",
+  "name": "FaraBombRush",
+  "author": "Fara",
+  "version": "1.0.0",
+  "description": "Add !bomb, !bombline, !bombreset",
+  "gameVersion": "1.29.1",
+  "dependsOn": {
+    "BSIPA": "^4.2.0"
+  }
+}
