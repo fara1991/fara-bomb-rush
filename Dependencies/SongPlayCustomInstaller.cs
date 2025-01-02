@@ -1,8 +1,6 @@
 ﻿using FaraBombRush.Controllers;
-using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
-using UnityEngine;
 using Zenject;
 
 namespace FaraBombRush.Dependencies;

@@ -9,15 +9,12 @@ namespace FaraBombRush.Controllers;
 
 public class FaraBombManagementPoolController
 {
-    private FaraBombManagementPoolModel _poolModel;
     private bool _isInitialized;
+    private FaraBombManagementPoolModel _poolModel;
 
     public void Initialize(GameObject rootObject)
     {
-        if (rootObject is null)
-        {
-            throw new ArgumentNullException(nameof(rootObject), "Root object cannot be null");
-        }
+        if (rootObject is null) throw new ArgumentNullException(nameof(rootObject), "Root object cannot be null");
 
         if (_isInitialized)
         {
@@ -41,22 +38,16 @@ public class FaraBombManagementPoolController
 
     private void ValidateInitializationAndInput(BombCommandModel commandModel)
     {
-        if (!_isInitialized)
-        {
-            throw new InvalidOperationException("Pool is not initialized");
-        }
+        if (!_isInitialized) throw new InvalidOperationException("Pool is not initialized");
 
-        if (commandModel == null)
-        {
-            throw new ArgumentNullException(nameof(commandModel));
-        }
+        if (commandModel == null) throw new ArgumentNullException(nameof(commandModel));
     }
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
         try
         {
-            var noteLineEnum = (NoteLineCustomEnum)commandModel.PositionIndex;
+            var noteLineEnum = (NoteLineCustomEnum) commandModel.PositionIndex;
             return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
         }
         catch (Exception ex)
@@ -67,7 +58,7 @@ public class FaraBombManagementPoolController
         }
     }
 
-    private void InitializeInstance(FaraBombComponents instance, BombCommandModel commandModel)
+    private void InitializeInstance(FaraBombComponentModel instance, BombCommandModel commandModel)
     {
         try
         {
@@ -89,11 +80,8 @@ public class FaraBombManagementPoolController
         {
             var spawnPosition = CalculateSpawnPosition(commandModel);
             var instance = _poolModel.Spawn(spawnPosition);
-               
-            if (instance is null)
-            {
-                throw new InvalidOperationException("Failed to spawn instance from pool");
-            }
+
+            if (instance is null) throw new InvalidOperationException("Failed to spawn instance from pool");
 
             InitializeInstance(instance, commandModel);
         }
@@ -105,7 +93,7 @@ public class FaraBombManagementPoolController
         }
     }
 
-    public void Despawn(FaraBombComponents instance)
+    public void Despawn(FaraBombComponentModel instance)
     {
         if (!_isInitialized)
         {
@@ -131,7 +119,7 @@ public class FaraBombManagementPoolController
         }
     }
 
-    public List<FaraBombComponents> GetActiveItems()
+    public List<FaraBombComponentModel> GetActiveItems()
     {
         if (!_isInitialized)
         {

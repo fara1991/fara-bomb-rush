@@ -1,12 +1,14 @@
-﻿using FaraBombRush.Controllers;
+﻿using FaraBombRush.Configs;
+using FaraBombRush.Controllers;
 using UnityEngine;
+using Zenject;
 
 namespace FaraBombRush.Models;
 
 /// <summary>
-/// FaraBombの全コンポーネントを管理するクラス
+///     FaraBombの全コンポーネントを管理するクラス
 /// </summary>
-public class FaraBombComponents : MonoBehaviour
+public class FaraBombComponentModel : MonoBehaviour
 {
     // 各コンポーネントへの参照
     private FaraBombCoordinatorController Coordinator { get; set; }
@@ -18,46 +20,56 @@ public class FaraBombComponents : MonoBehaviour
     private GameObject RootObject { get; set; }
     private GameObject BombObject { get; set; }
     private GameObject EffectObject { get; set; }
-    
+    private PluginConfig _config;
+
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
+    }
+
+    private void OnDisable()
+    {
+        DisableComponents();
+    }
+
     public void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject)
     {
         RootObject = rootObject;
         BombObject = bombObject;
         EffectObject = effectObject;
-
-        Coordinator = RootObject.AddComponent<FaraBombCoordinatorController>();
-        Collider = BombObject.AddComponent<FaraBombColliderController>();
-        Move = RootObject.AddComponent<FaraBombMoveController>();
-        Effect = EffectObject.AddComponent<FaraBombEffectController>();
-
         RootObject.transform.position = Vector3.zero;
         BombObject.transform.position = Vector3.zero;
         EffectObject.transform.position = Vector3.zero;
-        SetupComponents();
-    }
-    
-    private void SetupComponents()
-    {
+
+        Coordinator = RootObject.AddComponent<FaraBombCoordinatorController>();
+        Move = RootObject.AddComponent<FaraBombMoveController>();
+        Effect = EffectObject.AddComponent<FaraBombEffectController>();
+        if (!_config.IsBombCutEnable)
+        {
+            Collider = BombObject.AddComponent<FaraBombColliderController>();
+        }
+        
         Coordinator.Setup(Collider, Move, Effect);
-        Collider.Initialize();
-        Move.Initialize();
-        Effect.Initialize();
+        Collider?.Initialize();
+        Move?.Initialize();
+        Effect?.Initialize();
     }
 
     public void OnSpawned()
     {
         EnableComponents();
-        RootObject.SetActive(true);
-        BombObject.SetActive(true);
-        EffectObject.SetActive(true);
+        RootObject?.SetActive(true);
+        BombObject?.SetActive(true);
+        EffectObject?.SetActive(true);
     }
 
     public void OnDespawned()
     {
         DisableComponents();
-        RootObject.SetActive(false);
-        BombObject.SetActive(false);
-        EffectObject.SetActive(false);
+        RootObject?.SetActive(false);
+        BombObject?.SetActive(false);
+        EffectObject?.SetActive(false);
     }
 
     private void EnableComponents()
@@ -76,11 +88,6 @@ public class FaraBombComponents : MonoBehaviour
         Effect.enabled = false;
     }
 
-    private void OnDisable()
-    {
-        DisableComponents();
-    }
-
     public void InitializeWithCommand(BombCommandModel command)
     {
         Coordinator.InitializeWithCommand(command);
@@ -90,7 +97,7 @@ public class FaraBombComponents : MonoBehaviour
     {
         Coordinator.UpdateState();
     }
-    
+
     public bool IsInvalid()
     {
         return Coordinator.IsInvalid();

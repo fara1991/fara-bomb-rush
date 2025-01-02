@@ -6,9 +6,34 @@ namespace FaraBombRush.Controllers;
 
 public class FaraBombColliderController : FaraBombComponentBase
 {
-    private bool _isCollidedEnter;
     private string _collisionSaberName;
+    private bool _isCollidedEnter;
     private SphereCollider _sphereCollider;
+
+    private void OnEnable()
+    {
+        EnableCollider();
+    }
+
+    private void OnDisable()
+    {
+        DisableCollider();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (_isCollidedEnter) return;
+        if (!IsSaberCollider(other))
+        {
+            Plugin.Logger.Debug($"Non-saber collision detected with {other.gameObject.name}");
+            return;
+        }
+
+        Plugin.Logger.Debug($"Saber collision detected: {other.gameObject.name}");
+
+        _collisionSaberName = other.gameObject.name;
+        _isCollidedEnter = true;
+    }
 
     public override void Initialize()
     {
@@ -32,23 +57,6 @@ public class FaraBombColliderController : FaraBombComponentBase
         _isCollidedEnter = false;
         _collisionSaberName = string.Empty;
         Plugin.Logger.Debug("Disable ColliderController");
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        Plugin.Logger.Debug("TriggerEnter ColliderController");
-        Plugin.Logger.Debug($"TriggerEnter {other.gameObject.name}");
-        if (_isCollidedEnter) return;
-        if (!IsSaberCollider(other))
-        {
-            Plugin.Logger.Debug($"Non-saber collision detected with {other.gameObject.name}");
-            return;
-        }
-
-        Plugin.Logger.Debug($"Saber collision detected: {other.gameObject.name}");
-            
-        _collisionSaberName = other.gameObject.name;
-        _isCollidedEnter = true;
     }
 
     private bool IsSaberCollider(Collider collider)
@@ -77,15 +85,5 @@ public class FaraBombColliderController : FaraBombComponentBase
     {
         base.Disable();
         gameObject.SetActive(false);
-    }
-
-    private void OnEnable()
-    {
-        EnableCollider();
-    }
-        
-    private void OnDisable()
-    {
-        DisableCollider();
     }
 }

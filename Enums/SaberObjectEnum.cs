@@ -3,5 +3,5 @@
 public enum SaberObjectEnum
 {
     LeftSaber,
-    RightSaber,
+    RightSaber
 }

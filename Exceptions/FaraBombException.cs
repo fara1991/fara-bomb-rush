@@ -6,7 +6,9 @@ public class FaraBombException : Exception
 {
     public FaraBombException(string message) : base(message)
     {
-        
     }
-    public FaraBombException(string message, Exception inner) : base(message, inner) {}
+
+    public FaraBombException(string message, Exception inner) : base(message, inner)
+    {
+    }
 }

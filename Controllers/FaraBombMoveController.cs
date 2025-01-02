@@ -7,9 +7,9 @@ public class FaraBombMoveController : FaraBombComponentBase
 {
     private const float DefaultNoteJumpSpeed = 18.0f;
     private const float BombDeletePositionZ = -3f;
+    private bool _isPaused;
 
     private float _noteJumpSpeed = DefaultNoteJumpSpeed;
-    private bool _isPaused;
 
     private void Update()
     {
@@ -21,7 +21,7 @@ public class FaraBombMoveController : FaraBombComponentBase
     public override void Initialize()
     {
         _noteJumpSpeed = DefaultNoteJumpSpeed;
-        Plugin.Logger.Debug($"Initializing BombController");
+        Plugin.Logger.Debug("Initializing BombController");
     }
 
     private void Move()

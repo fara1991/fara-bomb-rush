@@ -5,11 +5,6 @@ namespace FaraBombRush.Enums;
 
 public class NoteLineCustomEnum
 {
-    private readonly Vector3 _position;
-    private readonly NotePositionEnum _notePositionEnum;
-    private readonly int _playerHeight;
-    private const float SpawnZ = 30.0f;
-
     public enum NotePositionEnum
     {
         TopLeft,
@@ -21,8 +16,30 @@ public class NoteLineCustomEnum
         BottomLeft,
         BottomMiddleLeft,
         BottomMiddleRight,
-        BottomRight,
+        BottomRight
     }
+
+    private const float SpawnZ = 30.0f;
+
+    // Enum
+    public static readonly NoteLineCustomEnum TopLeft = new(-0.9f, 1.7f, SpawnZ, NotePositionEnum.TopLeft);
+    public static readonly NoteLineCustomEnum TopMiddleLeft = new(-0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleLeft);
+    public static readonly NoteLineCustomEnum TopMiddleRight = new(0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleRight);
+    public static readonly NoteLineCustomEnum TopRight = new(0.9f, 1.7f, SpawnZ, NotePositionEnum.TopRight);
+    public static readonly NoteLineCustomEnum CenterLeft = new(-0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterLeft);
+    public static readonly NoteLineCustomEnum CenterRight = new(0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterRight);
+    public static readonly NoteLineCustomEnum BottomLeft = new(-0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomLeft);
+
+    public static readonly NoteLineCustomEnum BottomMiddleLeft =
+        new(-0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleLeft);
+
+    public static readonly NoteLineCustomEnum BottomMiddleRight =
+        new(0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleRight);
+
+    public static readonly NoteLineCustomEnum BottomRight = new(0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomRight);
+    private readonly NotePositionEnum _notePositionEnum;
+    private readonly int _playerHeight;
+    private readonly Vector3 _position;
 
     private NoteLineCustomEnum(float x, float y, float z, NotePositionEnum notePositionEnum, int playerHeight = 140)
     {
@@ -63,18 +80,6 @@ public class NoteLineCustomEnum
     {
         return GetPositionString().Contains("Bottom");
     }
-
-    // Enum
-    public static readonly NoteLineCustomEnum TopLeft = new(-0.9f, 1.7f, SpawnZ, NotePositionEnum.TopLeft);
-    public static readonly NoteLineCustomEnum TopMiddleLeft = new(-0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleLeft);
-    public static readonly NoteLineCustomEnum TopMiddleRight = new(0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleRight);
-    public static readonly NoteLineCustomEnum TopRight = new(0.9f, 1.7f, SpawnZ, NotePositionEnum.TopRight);
-    public static readonly NoteLineCustomEnum CenterLeft = new(-0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterLeft);
-    public static readonly NoteLineCustomEnum CenterRight = new(0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterRight);
-    public static readonly NoteLineCustomEnum BottomLeft = new(-0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomLeft);
-    public static readonly NoteLineCustomEnum BottomMiddleLeft = new(-0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleLeft);
-    public static readonly NoteLineCustomEnum BottomMiddleRight = new(0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleRight);
-    public static readonly NoteLineCustomEnum BottomRight = new(0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomRight);
 
     public static explicit operator NoteLineCustomEnum(int index)
     {

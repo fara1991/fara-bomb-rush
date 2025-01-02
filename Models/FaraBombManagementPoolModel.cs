@@ -1,23 +1,24 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using FaraBombRush.Enums;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace FaraBombRush.Models;
 
 public class FaraBombManagementPoolModel
 {
-    private readonly Queue<FaraBombComponents> _pool;
-    private readonly HashSet<FaraBombComponents> _activeItems;
-    private readonly GameObject _rootPrefab;
     private const int InitialSize = 50;
+    private readonly HashSet<FaraBombComponentModel> _activeItems;
+    private readonly Queue<FaraBombComponentModel> _pool;
+    private readonly GameObject _rootPrefab;
 
     public FaraBombManagementPoolModel(GameObject rootObject)
     {
         try
         {
-            _pool = new Queue<FaraBombComponents>();
+            _pool = new Queue<FaraBombComponentModel>();
             _activeItems = [];
             _rootPrefab = rootObject;
 
@@ -32,34 +33,34 @@ public class FaraBombManagementPoolModel
         }
     }
 
+    public int ActiveCount => _activeItems.Count;
+    public int PoolCount => _pool.Count;
+
     private void PrewarmPool()
     {
-        for (var i = 0; i < InitialSize; i++)
-        {
-            CreateNewInstance();
-        }
+        for (var i = 0; i < InitialSize; i++) CreateNewInstance();
     }
 
     private void CreateNewInstance()
     {
-        var rootInstance = UnityEngine.Object.Instantiate(_rootPrefab);
-        var components = rootInstance.GetComponent<FaraBombComponents>() ??
-                         rootInstance.AddComponent<FaraBombComponents>();
+        var rootInstance = Object.Instantiate(_rootPrefab);
+        var components = rootInstance.GetComponent<FaraBombComponentModel>() ??
+                         rootInstance.AddComponent<FaraBombComponentModel>();
 
         var bombInstance = rootInstance.transform.GetChild(0).gameObject;
         var effectInstance = rootInstance.transform.GetChild(1).gameObject;
-        
+
         rootInstance.name = FaraBombNameEnum.Management.ToString();
         bombInstance.name = FaraBombNameEnum.BombObject.ToString();
         effectInstance.name = FaraBombNameEnum.ParticleEffect.ToString();
-        
+
         // コンポーネントの初期化
         components.Initialize(rootInstance, bombInstance, effectInstance);
         rootInstance.SetActive(false);
         _pool.Enqueue(components);
     }
-    
-    public FaraBombComponents Spawn(Vector3 position)
+
+    public FaraBombComponentModel Spawn(Vector3 position)
     {
         try
         {
@@ -84,7 +85,7 @@ public class FaraBombManagementPoolModel
         }
     }
 
-    public void Despawn(FaraBombComponents instance)
+    public void Despawn(FaraBombComponentModel instance)
     {
         if (instance is null)
         {
@@ -110,23 +111,20 @@ public class FaraBombManagementPoolModel
         }
     }
 
-    public IReadOnlyCollection<FaraBombComponents> GetActiveItems() => _activeItems;
+    public IReadOnlyCollection<FaraBombComponentModel> GetActiveItems()
+    {
+        return _activeItems;
+    }
 
     public void Cleanup()
     {
         try
         {
-            foreach (var item in _activeItems)
-            {
-                item?.gameObject.SetActive(false);
-            }
+            foreach (var item in _activeItems) item?.gameObject.SetActive(false);
 
             _activeItems.Clear();
 
-            foreach (var item in _pool.Where(item => item is not null))
-            {
-                UnityEngine.Object.Destroy(item.gameObject);
-            }
+            foreach (var item in _pool.Where(item => item is not null)) Object.Destroy(item.gameObject);
 
             _pool.Clear();
 
@@ -138,7 +136,4 @@ public class FaraBombManagementPoolModel
             Plugin.Logger.Error(ex);
         }
     }
-
-    public int ActiveCount => _activeItems.Count;
-    public int PoolCount => _pool.Count;
 }

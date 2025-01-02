@@ -5,36 +5,44 @@ using System.IO;
 using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
-using FaraBombRush.Enums;
 using FaraBombRush.Models;
 using UnityEngine;
+using Zenject;
 
 namespace FaraBombRush.Managers;
 
 public class FaraBombPoolManager : MonoBehaviour
 {
-    // プール管理
-    private FaraBombManagementPoolController _poolController;
-
-    // プレハブ参照
-    private GameObject _faraBombManagementPrefab;
-    private AssetBundle _assetBundle;
+    private const string FaraBombAssetName = "FaraBomb";
+    private const int MaxOnceAddBomb = 3;
+    private const int WaitAddBombFrame = 30;
+    private static readonly int ShaderColor = Shader.PropertyToID("_Color");
 
     private readonly string _faraBombAssetPath =
         Path.Combine(Environment.CurrentDirectory, "UserData", "FaraBombRush", "farabomb.particle");
 
-    private const string FaraBombAssetName = "FaraBomb";
-    private static readonly int ShaderColor = Shader.PropertyToID("_Color");
+    private AssetBundle _assetBundle;
+    private PluginConfig _config;
+
+    // プレハブ参照
+    private GameObject _faraBombManagementPrefab;
+
+    // プール管理
+    private FaraBombManagementPoolController _poolController;
+    private int _waitFrame;
 
     // コマンドキュー
     public static ConcurrentQueue<List<BombCommandModel>> CommandQueue { get; } = new();
-    private const int MaxOnceAddBomb = 3;
-    private const int WaitAddBombFrame = 30;
-    private int _waitFrame;
+
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
+    }
 
     private void Awake()
     {
-        if (!PluginConfig.Instance.IsBombCommandEnable)
+        if (!_config.IsBombCommandEnable)
         {
             enabled = false;
             return;
@@ -52,6 +60,38 @@ public class FaraBombPoolManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!enabled || !_config.IsBombCommandEnable) return;
+
+        try
+        {
+            ProcessCommandQueue();
+            UpdateActiveBombs();
+            CleanupInvalidBombs();
+        }
+        catch (Exception ex)
+        {
+            Plugin.Logger.Error("Error in Update");
+            Plugin.Logger.Error(ex);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        try
+        {
+            _poolController?.Cleanup();
+            if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
+            _assetBundle?.Unload(true);
+        }
+        catch (Exception ex)
+        {
+            Plugin.Logger.Error("Error during cleanup");
+            Plugin.Logger.Error(ex);
+        }
+    }
+    
     private void InitializeComponents()
     {
         InitializePrefabs();
@@ -62,9 +102,7 @@ public class FaraBombPoolManager : MonoBehaviour
     {
         _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
         if (_assetBundle is null)
-        {
             throw new InvalidOperationException($"Failed to load AssetBundle from {_faraBombAssetPath}");
-        }
 
         try
         {
@@ -72,10 +110,7 @@ public class FaraBombPoolManager : MonoBehaviour
             LogAssetBundleContents(_assetBundle);
 
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
-            if (prefab is null)
-            {
-                throw new InvalidOperationException("FaraBombEffect asset not found in bundle");
-            }
+            if (prefab is null) throw new InvalidOperationException("FaraBombEffect asset not found in bundle");
 
             // レンダラーの状態を確認
             var renderers = prefab.GetComponentsInChildren<Renderer>(true);
@@ -95,9 +130,7 @@ public class FaraBombPoolManager : MonoBehaviour
                 };
 
                 if (newMaterial.HasProperty(ShaderColor))
-                {
                     newMaterial.SetColor(ShaderColor, new Color(192f / 255f, 64f / 255f, 255f / 255f));
-                }
 
                 renderer.material = newMaterial;
             }
@@ -118,16 +151,10 @@ public class FaraBombPoolManager : MonoBehaviour
     private void LogAssetBundleContents(AssetBundle assetBundle)
     {
         var materials = assetBundle.LoadAllAssets<Material>();
-        foreach (var material in materials)
-        {
-            Plugin.Logger.Debug($"Loaded material: {material.name}");
-        }
+        foreach (var material in materials) Plugin.Logger.Debug($"Loaded material: {material.name}");
 
         var textures = assetBundle.LoadAllAssets<Texture>();
-        foreach (var texture in textures)
-        {
-            Plugin.Logger.Debug($"Loaded texture: {texture.name}");
-        }
+        foreach (var texture in textures) Plugin.Logger.Debug($"Loaded texture: {texture.name}");
     }
 
     private void LogRendererState(Renderer renderer)
@@ -142,10 +169,7 @@ public class FaraBombPoolManager : MonoBehaviour
 
             var mainTex = material.GetTexture("_MainTex");
             Plugin.Logger.Debug($"Has MainTex: {mainTex != null}");
-            if (mainTex != null)
-            {
-                Plugin.Logger.Debug($"MainTex size: {mainTex.width}x{mainTex.height}");
-            }
+            if (mainTex != null) Plugin.Logger.Debug($"MainTex size: {mainTex.width}x{mainTex.height}");
         }
     }
 
@@ -165,33 +189,13 @@ public class FaraBombPoolManager : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (!enabled || !PluginConfig.Instance.IsBombCommandEnable) return;
-
-        try
-        {
-            ProcessCommandQueue();
-            UpdateActiveBombs();
-            CleanupInvalidBombs();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Error in Update");
-            Plugin.Logger.Error(ex);
-        }
-    }
-
     private void ProcessCommandQueue()
     {
         if (!ShouldProcessCommands()) return;
 
         _waitFrame = 0;
 
-        if (CommandQueue.TryDequeue(out var commands))
-        {
-            ProcessCommands(commands);
-        }
+        if (CommandQueue.TryDequeue(out var commands)) ProcessCommands(commands);
     }
 
     private bool ShouldProcessCommands()
@@ -210,10 +214,7 @@ public class FaraBombPoolManager : MonoBehaviour
             .ToList();
 
         // 選択されたbombIdに対応するコマンドを処理
-        foreach (var command in commands.Where(cmd => selectedBombIds.Contains(cmd.BombId)))
-        {
-            SpawnBomb(command);
-        }
+        foreach (var command in commands.Where(cmd => selectedBombIds.Contains(cmd.BombId))) SpawnBomb(command);
     }
 
     private void SpawnBomb(BombCommandModel command)
@@ -231,10 +232,7 @@ public class FaraBombPoolManager : MonoBehaviour
 
     private void UpdateActiveBombs()
     {
-        foreach (var component in _poolController.GetActiveItems())
-        {
-            component.UpdateState();
-        }
+        foreach (var component in _poolController.GetActiveItems()) component.UpdateState();
     }
 
     private void CleanupInvalidBombs()
@@ -243,24 +241,6 @@ public class FaraBombPoolManager : MonoBehaviour
             .Where(bomb => bomb.IsInvalid())
             .ToList();
 
-        foreach (var bomb in invalidBombs)
-        {
-            _poolController.Despawn(bomb);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        try
-        {
-            _poolController?.Cleanup();
-            if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
-            _assetBundle?.Unload(true);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Error during cleanup");
-            Plugin.Logger.Error(ex);
-        }
+        foreach (var bomb in invalidBombs) _poolController.Despawn(bomb);
     }
 }

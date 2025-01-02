@@ -5,7 +5,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FaraBombRush")]
-[assembly: AssemblyDescription("You can add bombs while playing a song by running the '!bomb', '!bombline', '!bombreset' command.")]
+[assembly:
+    AssemblyDescription(
+        "You can add bombs while playing a song by running the '!bomb', '!bombline', '!bombreset' command.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FaraBombRush")]

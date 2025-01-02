@@ -2,8 +2,8 @@
 
 public interface IFaraBombComponent
 {
-    void Initialize();
     bool IsEnabled { get; }
+    void Initialize();
     void Enable();
     void Disable();
 }
