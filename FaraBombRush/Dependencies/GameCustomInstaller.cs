@@ -16,6 +16,5 @@ public class GameCustomInstaller : Installer
     public override void InstallBindings()
     {
         Container.BindInstance(_config).AsSingle();
-        Container.BindInterfacesAndSelfTo<ChatCoreWrapperController>().AsCached().NonLazy();
     }
 }

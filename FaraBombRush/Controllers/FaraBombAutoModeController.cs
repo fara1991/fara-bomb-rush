@@ -1,23 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
+using UnityEngine;
+using Zenject;
 using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers;
 
-public class FaraBombAutoModeController : FaraBombBaseController
+public class FaraBombAutoModeController : MonoBehaviour
 {
     private int _noteCutCount;
 
     private readonly List<NotePositionEnum> _notePositionEnumList =
         Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+    private const float BombLineDiffBeat = 1.0f;
 
     private int _bombId;
     private FaraBombLevel _level;
+    private PluginConfig _config;
+
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
+    }
+
 
     private void Start()
     {
@@ -56,7 +68,7 @@ public class FaraBombAutoModeController : FaraBombBaseController
         var selectedPosList = new List<int>();
 
         var bombCommandListModel = new List<BombCommandModel>();
-        if (pattern == FaraBombCreatePatternEnum.BombSingle || 
+        if (pattern == FaraBombCreatePatternEnum.BombSingle ||
             pattern == FaraBombCreatePatternEnum.BombDouble ||
             pattern == FaraBombCreatePatternEnum.BombTriple)
         {
@@ -111,6 +123,33 @@ public class FaraBombAutoModeController : FaraBombBaseController
                 FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
                 selectedPosList.Add(posInt);
             }
+        }
+    }
+
+    private void SearchStartAndEndPosition(int posInt, out int start, out int end)
+    {
+        var e = (NoteLineCustomEnum)(posInt - 1);
+        if (e.IsTopPosition())
+        {
+            start = TopLeft.GetPositionIndex();
+            end = TopRight.GetPositionIndex();
+        }
+        else if (e.IsBottomPosition())
+        {
+            start = BottomLeft.GetPositionIndex();
+            end = BottomRight.GetPositionIndex();
+        }
+        else if (e.IsCenterPosition())
+        {
+            start = CenterLeft.GetPositionIndex();
+            end = CenterRight.GetPositionIndex();
+        }
+        else
+        {
+            // 万が一変な数値が来たらBottomのボムリセとして扱う
+            Plugin.Logger.Debug($"Outbound value. pos: {posInt}.");
+            start = BottomLeft.GetPositionIndex();
+            end = BottomRight.GetPositionIndex();
         }
     }
 }

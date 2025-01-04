@@ -50,7 +50,7 @@ public class NoteLineCustomEnum
 
     public int GetPositionIndex()
     {
-        return (int) _notePositionEnum;
+        return (int)_notePositionEnum;
     }
 
     private string GetPositionString()
@@ -85,21 +85,21 @@ public class NoteLineCustomEnum
     {
         switch (index)
         {
-            case (int) NotePositionEnum.TopLeft: return TopLeft;
-            case (int) NotePositionEnum.TopMiddleLeft: return TopMiddleLeft;
-            case (int) NotePositionEnum.TopMiddleRight: return TopMiddleRight;
-            case (int) NotePositionEnum.TopRight: return TopRight;
-            case (int) NotePositionEnum.CenterLeft: return CenterLeft;
-            case (int) NotePositionEnum.CenterRight: return CenterRight;
-            case (int) NotePositionEnum.BottomLeft: return BottomLeft;
-            case (int) NotePositionEnum.BottomMiddleLeft: return BottomMiddleLeft;
-            case (int) NotePositionEnum.BottomMiddleRight: return BottomMiddleRight;
-            case (int) NotePositionEnum.BottomRight: return BottomRight;
+            case (int)NotePositionEnum.TopLeft: return TopLeft;
+            case (int)NotePositionEnum.TopMiddleLeft: return TopMiddleLeft;
+            case (int)NotePositionEnum.TopMiddleRight: return TopMiddleRight;
+            case (int)NotePositionEnum.TopRight: return TopRight;
+            case (int)NotePositionEnum.CenterLeft: return CenterLeft;
+            case (int)NotePositionEnum.CenterRight: return CenterRight;
+            case (int)NotePositionEnum.BottomLeft: return BottomLeft;
+            case (int)NotePositionEnum.BottomMiddleLeft: return BottomMiddleLeft;
+            case (int)NotePositionEnum.BottomMiddleRight: return BottomMiddleRight;
+            case (int)NotePositionEnum.BottomRight: return BottomRight;
             default:
-            {
-                Plugin.Logger.Debug("Enum Outbound index");
-                throw new NotImplementedException();
-            }
+                {
+                    Plugin.Logger.Debug("Enum Outbound index");
+                    throw new NotImplementedException();
+                }
         }
     }
 }

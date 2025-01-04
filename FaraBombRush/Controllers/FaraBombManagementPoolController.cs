@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Models;
 using UnityEngine;
@@ -12,7 +13,7 @@ public class FaraBombManagementPoolController
     private bool _isInitialized;
     private FaraBombManagementPoolModel _poolModel;
 
-    public void Initialize(GameObject rootObject)
+    public void Initialize(GameObject rootObject, PluginConfig pluginConfig)
     {
         if (rootObject is null) throw new ArgumentNullException(nameof(rootObject), "Root object cannot be null");
 
@@ -24,7 +25,7 @@ public class FaraBombManagementPoolController
 
         try
         {
-            _poolModel = new FaraBombManagementPoolModel(rootObject);
+            _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
             _isInitialized = true;
             Plugin.Logger.Debug("Pool initialized successfully");
         }
@@ -47,7 +48,7 @@ public class FaraBombManagementPoolController
     {
         try
         {
-            var noteLineEnum = (NoteLineCustomEnum) commandModel.PositionIndex;
+            var noteLineEnum = (NoteLineCustomEnum)commandModel.PositionIndex;
             return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
         }
         catch (Exception ex)

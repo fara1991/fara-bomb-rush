@@ -14,7 +14,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
     private FaraBombColliderController _collider;
     private FaraBombEffectController _effect;
     private FaraBombMoveController _movement;
-    
+
     private FaraBombStateEnum _currentState = FaraBombStateEnum.Idle;
 
     public void Setup(

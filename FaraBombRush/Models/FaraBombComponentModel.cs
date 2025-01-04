@@ -1,7 +1,6 @@
 ﻿using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using UnityEngine;
-using Zenject;
 
 namespace FaraBombRush.Models;
 
@@ -20,20 +19,13 @@ public class FaraBombComponentModel : MonoBehaviour
     private GameObject RootObject { get; set; }
     private GameObject BombObject { get; set; }
     private GameObject EffectObject { get; set; }
-    private PluginConfig _config;
-
-    [Inject]
-    private void Construct(PluginConfig config)
-    {
-        _config = config;
-    }
 
     private void OnDisable()
     {
         DisableComponents();
     }
 
-    public void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject)
+    public void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject, PluginConfig pluginConfig)
     {
         RootObject = rootObject;
         BombObject = bombObject;
@@ -45,11 +37,11 @@ public class FaraBombComponentModel : MonoBehaviour
         Coordinator = RootObject.AddComponent<FaraBombCoordinatorController>();
         Move = RootObject.AddComponent<FaraBombMoveController>();
         Effect = EffectObject.AddComponent<FaraBombEffectController>();
-        if (!_config.IsBombCutEnable)
+        if (pluginConfig.IsBombCutEnable)
         {
             Collider = BombObject.AddComponent<FaraBombColliderController>();
         }
-        
+
         Coordinator.Setup(Collider, Move, Effect);
         Collider?.Initialize();
         Move?.Initialize();
@@ -74,28 +66,28 @@ public class FaraBombComponentModel : MonoBehaviour
 
     private void EnableComponents()
     {
-        Coordinator.enabled = true;
-        Collider.enabled = true;
-        Move.enabled = true;
-        Effect.enabled = true;
+        if (Coordinator is not null) Coordinator.enabled = true;
+        if (Collider is not null) Collider.enabled = true;
+        if (Move is not null) Move.enabled = true;
+        if (Effect is not null) Effect.enabled = true;
     }
 
     private void DisableComponents()
     {
-        Coordinator.enabled = false;
-        Collider.enabled = false;
-        Move.enabled = false;
-        Effect.enabled = false;
+        if (Coordinator is not null) Coordinator.enabled = false;
+        if (Collider is not null) Collider.enabled = false;
+        if (Move is not null) Move.enabled = false;
+        if (Effect is not null) Effect.enabled = false;
     }
 
     public void InitializeWithCommand(BombCommandModel command)
     {
-        Coordinator.InitializeWithCommand(command);
+        Coordinator?.InitializeWithCommand(command);
     }
 
     public void UpdateState()
     {
-        Coordinator.UpdateState();
+        Coordinator?.UpdateState();
     }
 
     public bool IsInvalid()

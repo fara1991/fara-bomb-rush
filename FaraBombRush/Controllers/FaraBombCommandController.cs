@@ -5,17 +5,18 @@ using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
-using Zenject;
 using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers;
 
-public class FaraBombCommandController: FaraBombBaseController
+public class FaraBombCommandController
 {
     private const string BaseCommand = "!bomb";
     private const string LineCommand = "!bombline";
     private const string ResetCommand = "!bombreset";
+    private const float BombLineDiffBeat = 1.0f;
+    private int _bombId;
 
     private readonly List<NotePositionEnum> _notePositionEnumList =
         Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
@@ -30,7 +31,7 @@ public class FaraBombCommandController: FaraBombBaseController
         return pos >= 1 && _notePositionEnumList.Count >= pos;
     }
 
-    public void BombPush(string chat)
+    public void BombPush(string chat, PluginConfig pluginConfig)
     {
         // bomb制御用に適用なIDを付与
         _bombId = _bombId >= int.MaxValue ? 1 : _bombId + 1;
@@ -45,14 +46,13 @@ public class FaraBombCommandController: FaraBombBaseController
         var bombCommandListModel = new List<BombCommandModel>();
         if (chat.Contains(LineCommand))
         {
-            for (var i = 0; i < _config.BombLineCount; i++)
+            for (var i = 0; i < pluginConfig.BombLineCount; i++)
                 bombCommandListModel.Add(new BombCommandModel
                 {
                     BombId = _bombId,
                     SpawnDelayTime = BombLineDiffBeat * i,
                     PositionIndex = posInt - 1
                 });
-            FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
         }
         else if (chat.Contains(ResetCommand))
         {
@@ -64,7 +64,6 @@ public class FaraBombCommandController: FaraBombBaseController
                     SpawnDelayTime = 0,
                     PositionIndex = i
                 });
-            FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
         }
         else if (chat.Contains(BaseCommand))
         {
@@ -74,7 +73,34 @@ public class FaraBombCommandController: FaraBombBaseController
                 SpawnDelayTime = 0,
                 PositionIndex = posInt - 1
             });
-            FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+        }
+        FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+    }
+
+    private void SearchStartAndEndPosition(int posInt, out int start, out int end)
+    {
+        var e = (NoteLineCustomEnum)(posInt - 1);
+        if (e.IsTopPosition())
+        {
+            start = TopLeft.GetPositionIndex();
+            end = TopRight.GetPositionIndex();
+        }
+        else if (e.IsBottomPosition())
+        {
+            start = BottomLeft.GetPositionIndex();
+            end = BottomRight.GetPositionIndex();
+        }
+        else if (e.IsCenterPosition())
+        {
+            start = CenterLeft.GetPositionIndex();
+            end = CenterRight.GetPositionIndex();
+        }
+        else
+        {
+            // 万が一変な数値が来たらBottomのボムリセとして扱う
+            Plugin.Logger.Debug($"Outbound value. pos: {posInt}.");
+            start = BottomLeft.GetPositionIndex();
+            end = BottomRight.GetPositionIndex();
         }
     }
 }

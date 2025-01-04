@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -13,9 +14,11 @@ public class FaraBombManagementPoolModel
     private readonly HashSet<FaraBombComponentModel> _activeItems;
     private readonly Queue<FaraBombComponentModel> _pool;
     private readonly GameObject _rootPrefab;
+    private PluginConfig _pluginConfig;
 
-    public FaraBombManagementPoolModel(GameObject rootObject)
+    public FaraBombManagementPoolModel(GameObject rootObject, PluginConfig pluginConfig)
     {
+        _pluginConfig = pluginConfig;
         try
         {
             _pool = new Queue<FaraBombComponentModel>();
@@ -55,7 +58,7 @@ public class FaraBombManagementPoolModel
         effectInstance.name = FaraBombNameEnum.ParticleEffect.ToString();
 
         // コンポーネントの初期化
-        components.Initialize(rootInstance, bombInstance, effectInstance);
+        components.Initialize(rootInstance, bombInstance, effectInstance, _pluginConfig);
         rootInstance.SetActive(false);
         _pool.Enqueue(components);
     }

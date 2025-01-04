@@ -11,7 +11,7 @@ internal class FaraBombRushFlowCoordinator : FlowCoordinator
     private SettingViewController _settingViewController;
 
     [Inject]
-    public void Construct(
+    private void Construct(
         MainFlowCoordinator mainFlowCoordinator,
         SettingViewController settingViewController)
     {

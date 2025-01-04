@@ -43,7 +43,6 @@
     <ItemGroup>
         <Compile Include="Controllers\ChatCoreWrapperController.cs"/>
         <Compile Include="Controllers\FaraBombAutoModeController.cs" />
-        <Compile Include="Controllers\FaraBombBaseController.cs" />
         <Compile Include="Controllers\FaraBombCommandController.cs"/>
         <Compile Include="Controllers\FaraBombColliderController.cs"/>
         <Compile Include="Controllers\FaraBombEffectController.cs"/>
@@ -89,9 +88,6 @@
             <Version>2.0.0-beta1</Version>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="System.Text.Json">
-            <Version>9.0.0</Version>
         </PackageReference>
     </ItemGroup>
     <ItemGroup>

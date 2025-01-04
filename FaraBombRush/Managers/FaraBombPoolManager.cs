@@ -91,7 +91,7 @@ public class FaraBombPoolManager : MonoBehaviour
             Plugin.Logger.Error(ex);
         }
     }
-    
+
     private void InitializeComponents()
     {
         InitializePrefabs();
@@ -106,9 +106,6 @@ public class FaraBombPoolManager : MonoBehaviour
 
         try
         {
-            // マテリアル・テクスチャの読み込み状態をログ出力
-            LogAssetBundleContents(_assetBundle);
-
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
             if (prefab is null) throw new InvalidOperationException("FaraBombEffect asset not found in bundle");
 
@@ -116,7 +113,6 @@ public class FaraBombPoolManager : MonoBehaviour
             var renderers = prefab.GetComponentsInChildren<Renderer>(true);
             foreach (var renderer in renderers)
             {
-                LogRendererState(renderer);
                 if (renderer.gameObject.name != "FaraBombObject") continue;
 
                 var material = renderer.sharedMaterial;
@@ -148,37 +144,12 @@ public class FaraBombPoolManager : MonoBehaviour
         }
     }
 
-    private void LogAssetBundleContents(AssetBundle assetBundle)
-    {
-        var materials = assetBundle.LoadAllAssets<Material>();
-        foreach (var material in materials) Plugin.Logger.Debug($"Loaded material: {material.name}");
-
-        var textures = assetBundle.LoadAllAssets<Texture>();
-        foreach (var texture in textures) Plugin.Logger.Debug($"Loaded texture: {texture.name}");
-    }
-
-    private void LogRendererState(Renderer renderer)
-    {
-        foreach (var material in renderer.sharedMaterials)
-        {
-            if (material == null) continue;
-
-            Plugin.Logger.Debug($"Found renderer in {renderer.gameObject.name}");
-            Plugin.Logger.Debug($"Material: {material.name} on {renderer.gameObject.name}");
-            Plugin.Logger.Debug($"Shader: {material.shader.name}");
-
-            var mainTex = material.GetTexture("_MainTex");
-            Plugin.Logger.Debug($"Has MainTex: {mainTex != null}");
-            if (mainTex != null) Plugin.Logger.Debug($"MainTex size: {mainTex.width}x{mainTex.height}");
-        }
-    }
-
     private void InitializePool()
     {
         try
         {
             _poolController = new FaraBombManagementPoolController();
-            _poolController.Initialize(_faraBombManagementPrefab);
+            _poolController.Initialize(_faraBombManagementPrefab, _config);
             Plugin.Logger.Debug("Pool initialized successfully");
         }
         catch (Exception ex)

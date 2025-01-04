@@ -26,7 +26,7 @@ public class Plugin
         // Zenjector
         zenjector.Install<GameCustomInstaller>(Location.App, pluginConfig);
         zenjector.Install<MenuCustomInstaller>(Location.Menu);
-        zenjector.Install<SongPlayCustomInstaller>(Location.Player);
+        zenjector.Install<SongPlayCustomInstaller>(Location.Player, pluginConfig);
     }
 
     internal static IPALogger Logger { get; private set; }
