@@ -1,0 +1,5 @@
+﻿repos:
+  - repo: https://github.com/jvstein/pre-commit-dotnet-format
+    rev: 'v0.3'
+    hooks:
+      - id: dotnet-format
