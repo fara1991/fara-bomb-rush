@@ -1,7 +1,7 @@
 ﻿using FaraBombRush.Enums;
 using FaraBombRush.Interfaces;
 
-namespace FaraBombRush.Controllers;
+namespace FaraBombRush.Controllers.Components;
 
 public class FaraBombEffectController : FaraBombComponentBase
 {

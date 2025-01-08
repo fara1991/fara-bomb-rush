@@ -39,7 +39,7 @@ public class SongPlayCustomInstaller : Installer
         if (_config.GameMode == GameModeEnum.Interactive.ToString())
         {
             Container.BindInterfacesAndSelfTo<ChatCoreWrapperController>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            Container.BindInterfacesAndSelfTo<FaraBombCommandController>().AsCached().NonLazy();
+            Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().AsCached().NonLazy();
         }
         else if (_config.GameMode == GameModeEnum.Auto.ToString())
         {

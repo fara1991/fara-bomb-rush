@@ -8,9 +8,9 @@ using FaraBombRush.Models;
 using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
-namespace FaraBombRush.Controllers;
+namespace FaraBombRush.Controllers.GameModes;
 
-public class FaraBombCommandController
+public class FaraBombInteractiveModeController
 {
     private const string BaseCommand = "!bomb";
     private const string LineCommand = "!bombline";

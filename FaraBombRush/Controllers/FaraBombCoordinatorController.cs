@@ -4,6 +4,7 @@ using FaraBombRush.Enums;
 using FaraBombRush.Interfaces;
 using FaraBombRush.Models;
 using UnityEngine;
+using FaraBombRush.Controllers.Components;
 
 namespace FaraBombRush.Controllers;
 

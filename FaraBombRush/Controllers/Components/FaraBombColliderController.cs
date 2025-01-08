@@ -2,7 +2,7 @@
 using FaraBombRush.Interfaces;
 using UnityEngine;
 
-namespace FaraBombRush.Controllers;
+namespace FaraBombRush.Controllers.Components;
 
 public class FaraBombColliderController : FaraBombComponentBase
 {

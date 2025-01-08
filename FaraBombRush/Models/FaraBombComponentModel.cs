@@ -1,5 +1,6 @@
 ﻿using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
+using FaraBombRush.Controllers.Components;
 using UnityEngine;
 
 namespace FaraBombRush.Models;

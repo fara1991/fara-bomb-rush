@@ -10,7 +10,7 @@ using Zenject;
 using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
-namespace FaraBombRush.Controllers;
+namespace FaraBombRush.Controllers.GameModes;
 
 public class FaraBombAutoModeController : MonoBehaviour
 {

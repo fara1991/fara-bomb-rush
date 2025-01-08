@@ -3,12 +3,13 @@ using ChatCore.Interfaces;
 using FaraBombRush.Configs;
 using UnityEngine;
 using Zenject;
+using FaraBombRush.Controllers.GameModes;
 
 namespace FaraBombRush.Controllers;
 
 public class ChatCoreWrapperController : MonoBehaviour
 {
-    private readonly FaraBombCommandController _bombCommandController;
+    private readonly FaraBombInteractiveModeController _bombInteractiveModeController;
     private PluginConfig _config;
 
     [Inject]
@@ -21,12 +22,12 @@ public class ChatCoreWrapperController : MonoBehaviour
     {
         var chatCoreInstance = ChatCoreInstance.Create();
         chatCoreInstance.RunAllServices().GetTwitchService().OnTextMessageReceived += ChatCoreOnTextMessageReceived;
-        _bombCommandController = new FaraBombCommandController();
+        _bombInteractiveModeController = new FaraBombInteractiveModeController();
     }
 
     private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
     {
-        if (service.DisplayName == "Twitch" && _bombCommandController.CheckCommand(message.Message))
-            _bombCommandController.BombPush(message.Message, _config);
+        if (service.DisplayName == "Twitch" && _bombInteractiveModeController.CheckCommand(message.Message))
+            _bombInteractiveModeController.BombPush(message.Message, _config);
     }
 }
