@@ -18,8 +18,8 @@ public class FaraBombInteractiveModeController
     private const float BombLineDiffBeat = 1.0f;
     private int _bombId;
 
-    private readonly List<NotePositionEnum> _notePositionEnumList =
-        Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+    private readonly List<NotePosition> _notePositionEnumList =
+        Enum.GetValues(typeof(NotePosition)).Cast<NotePosition>().ToList();
 
     public bool CheckCommand(string chat)
     {
@@ -33,6 +33,7 @@ public class FaraBombInteractiveModeController
 
     public void BombPush(string chat, PluginConfig pluginConfig)
     {
+        Plugin.Logger.Debug("123");
         // bomb制御用に適用なIDを付与
         _bombId = _bombId >= int.MaxValue ? 1 : _bombId + 1;
 
@@ -74,7 +75,7 @@ public class FaraBombInteractiveModeController
                 PositionIndex = posInt - 1
             });
         }
-        FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
     }
 
     private void SearchStartAndEndPosition(int posInt, out int start, out int end)

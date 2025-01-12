@@ -5,7 +5,7 @@ namespace FaraBombRush.Enums;
 
 public class NoteLineCustomEnum
 {
-    public enum NotePositionEnum
+    public enum NotePosition
     {
         TopLeft,
         TopMiddleLeft,
@@ -22,40 +22,40 @@ public class NoteLineCustomEnum
     private const float SpawnZ = 30.0f;
 
     // Enum
-    public static readonly NoteLineCustomEnum TopLeft = new(-0.9f, 1.7f, SpawnZ, NotePositionEnum.TopLeft);
-    public static readonly NoteLineCustomEnum TopMiddleLeft = new(-0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleLeft);
-    public static readonly NoteLineCustomEnum TopMiddleRight = new(0.3f, 1.7f, SpawnZ, NotePositionEnum.TopMiddleRight);
-    public static readonly NoteLineCustomEnum TopRight = new(0.9f, 1.7f, SpawnZ, NotePositionEnum.TopRight);
-    public static readonly NoteLineCustomEnum CenterLeft = new(-0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterLeft);
-    public static readonly NoteLineCustomEnum CenterRight = new(0.9f, 1.2f, SpawnZ, NotePositionEnum.CenterRight);
-    public static readonly NoteLineCustomEnum BottomLeft = new(-0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomLeft);
+    public static readonly NoteLineCustomEnum TopLeft = new(-0.9f, 1.7f, SpawnZ, NotePosition.TopLeft);
+    public static readonly NoteLineCustomEnum TopMiddleLeft = new(-0.3f, 1.7f, SpawnZ, NotePosition.TopMiddleLeft);
+    public static readonly NoteLineCustomEnum TopMiddleRight = new(0.3f, 1.7f, SpawnZ, NotePosition.TopMiddleRight);
+    public static readonly NoteLineCustomEnum TopRight = new(0.9f, 1.7f, SpawnZ, NotePosition.TopRight);
+    public static readonly NoteLineCustomEnum CenterLeft = new(-0.9f, 1.2f, SpawnZ, NotePosition.CenterLeft);
+    public static readonly NoteLineCustomEnum CenterRight = new(0.9f, 1.2f, SpawnZ, NotePosition.CenterRight);
+    public static readonly NoteLineCustomEnum BottomLeft = new(-0.9f, 0.7f, SpawnZ, NotePosition.BottomLeft);
 
     public static readonly NoteLineCustomEnum BottomMiddleLeft =
-        new(-0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleLeft);
+        new(-0.3f, 0.7f, SpawnZ, NotePosition.BottomMiddleLeft);
 
     public static readonly NoteLineCustomEnum BottomMiddleRight =
-        new(0.3f, 0.7f, SpawnZ, NotePositionEnum.BottomMiddleRight);
+        new(0.3f, 0.7f, SpawnZ, NotePosition.BottomMiddleRight);
 
-    public static readonly NoteLineCustomEnum BottomRight = new(0.9f, 0.7f, SpawnZ, NotePositionEnum.BottomRight);
-    private readonly NotePositionEnum _notePositionEnum;
+    public static readonly NoteLineCustomEnum BottomRight = new(0.9f, 0.7f, SpawnZ, NotePosition.BottomRight);
+    private readonly NotePosition _notePosition;
     private readonly int _playerHeight;
     private readonly Vector3 _position;
 
-    private NoteLineCustomEnum(float x, float y, float z, NotePositionEnum notePositionEnum, int playerHeight = 140)
+    private NoteLineCustomEnum(float x, float y, float z, NotePosition notePosition, int playerHeight = 140)
     {
         _position = new Vector3(x, y, z);
-        _notePositionEnum = notePositionEnum;
+        _notePosition = notePosition;
         _playerHeight = playerHeight;
     }
 
     public int GetPositionIndex()
     {
-        return (int)_notePositionEnum;
+        return (int)_notePosition;
     }
 
     private string GetPositionString()
     {
-        return _notePositionEnum.ToString();
+        return _notePosition.ToString();
     }
 
     public Vector3 GetNotePosition(float spawnDelayTime)
@@ -85,16 +85,16 @@ public class NoteLineCustomEnum
     {
         switch (index)
         {
-            case (int)NotePositionEnum.TopLeft: return TopLeft;
-            case (int)NotePositionEnum.TopMiddleLeft: return TopMiddleLeft;
-            case (int)NotePositionEnum.TopMiddleRight: return TopMiddleRight;
-            case (int)NotePositionEnum.TopRight: return TopRight;
-            case (int)NotePositionEnum.CenterLeft: return CenterLeft;
-            case (int)NotePositionEnum.CenterRight: return CenterRight;
-            case (int)NotePositionEnum.BottomLeft: return BottomLeft;
-            case (int)NotePositionEnum.BottomMiddleLeft: return BottomMiddleLeft;
-            case (int)NotePositionEnum.BottomMiddleRight: return BottomMiddleRight;
-            case (int)NotePositionEnum.BottomRight: return BottomRight;
+            case (int)NotePosition.TopLeft: return TopLeft;
+            case (int)NotePosition.TopMiddleLeft: return TopMiddleLeft;
+            case (int)NotePosition.TopMiddleRight: return TopMiddleRight;
+            case (int)NotePosition.TopRight: return TopRight;
+            case (int)NotePosition.CenterLeft: return CenterLeft;
+            case (int)NotePosition.CenterRight: return CenterRight;
+            case (int)NotePosition.BottomLeft: return BottomLeft;
+            case (int)NotePosition.BottomMiddleLeft: return BottomMiddleLeft;
+            case (int)NotePosition.BottomMiddleRight: return BottomMiddleRight;
+            case (int)NotePosition.BottomRight: return BottomRight;
             default:
                 {
                     Plugin.Logger.Debug("Enum Outbound index");

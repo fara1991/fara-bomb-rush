@@ -1,6 +1,7 @@
 ﻿using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
+using FaraBombRush.Enums;
 using UnityEngine;
 
 namespace FaraBombRush.Models;
@@ -43,10 +44,10 @@ public class FaraBombComponentModel : MonoBehaviour
             Collider = BombObject.AddComponent<FaraBombColliderController>();
         }
 
+        Collider?.Initialize(pluginConfig);
+        Move?.Initialize(pluginConfig);
+        Effect?.Initialize(pluginConfig);
         Coordinator.Setup(Collider, Move, Effect);
-        Collider?.Initialize();
-        Move?.Initialize();
-        Effect?.Initialize();
     }
 
     public void OnSpawned()
@@ -94,5 +95,10 @@ public class FaraBombComponentModel : MonoBehaviour
     public bool IsInvalid()
     {
         return Coordinator.IsInvalid();
+    }
+
+    public FaraBombCalcScoreEnum.ScoreMode GetFaraBombScoreMode()
+    {
+        return Coordinator.GetScoreMode();
     }
 }

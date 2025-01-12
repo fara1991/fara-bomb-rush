@@ -1,9 +1,11 @@
-﻿namespace FaraBombRush.Interfaces;
+﻿using FaraBombRush.Configs;
+
+namespace FaraBombRush.Interfaces;
 
 public interface IFaraBombComponent
 {
     bool IsEnabled { get; }
-    void Initialize();
+    void InitializeComponent();
     void Enable();
     void Disable();
 }

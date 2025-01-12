@@ -1,5 +1,7 @@
 ﻿using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
+using FaraBombRush.Controllers.Components;
+using FaraBombRush.Controllers.GameModes;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
@@ -18,8 +20,7 @@ public class SongPlayCustomInstaller : Installer
 
     public override void InstallBindings()
     {
-        // Pool Manager
-        Container.BindInterfacesAndSelfTo<FaraBombPoolManager>()
+        Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()
             .AsCached()
             .NonLazy();
@@ -34,6 +35,7 @@ public class SongPlayCustomInstaller : Installer
         Container.Bind<FaraBombColliderController>().FromNewComponentOnNewGameObject().AsTransient();
         Container.Bind<FaraBombMoveController>().FromNewComponentOnNewGameObject().AsTransient();
         Container.Bind<FaraBombEffectController>().FromNewComponentOnNewGameObject().AsTransient();
+        Container.Bind<FaraBombScoreController>().FromNewComponentOnNewGameObject().AsTransient();
 
         // Play Mode
         if (_config.GameMode == GameModeEnum.Interactive.ToString())
@@ -43,7 +45,7 @@ public class SongPlayCustomInstaller : Installer
         }
         else if (_config.GameMode == GameModeEnum.Auto.ToString())
         {
-            Container.BindInterfacesAndSelfTo<FaraBombAutoModeController>().AsCached().NonLazy();
+            Container.BindInterfacesAndSelfTo<FaraBombAutoModeController>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
         }
         else if (_config.GameMode == GameModeEnum.Battle.ToString())
         {

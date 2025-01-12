@@ -35,7 +35,7 @@ public class FaraBombColliderController : FaraBombComponentBase
         _isCollidedEnter = true;
     }
 
-    public override void Initialize()
+    public override void InitializeComponent()
     {
         // コライダーはbombObjectについているものを使用
         _sphereCollider ??= transform.GetComponent<SphereCollider>();

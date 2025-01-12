@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Enums;
+using static FaraBombRush.Enums.ErrorCodeEnum;
+using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
 using UnityEngine;
 
@@ -15,48 +17,21 @@ public class FaraBombManagementPoolController
 
     public void Initialize(GameObject rootObject, PluginConfig pluginConfig)
     {
-        if (rootObject is null) throw new ArgumentNullException(nameof(rootObject), "Root object cannot be null");
-
         if (_isInitialized)
         {
             Plugin.Logger.Warn("Pool is already initialized");
             return;
         }
 
-        try
-        {
-            _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
-            _isInitialized = true;
-            Plugin.Logger.Debug("Pool initialized successfully");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Failed to initialize pool");
-            Plugin.Logger.Error(ex);
-            throw;
-        }
-    }
-
-    private void ValidateInitializationAndInput(BombCommandModel commandModel)
-    {
-        if (!_isInitialized) throw new InvalidOperationException("Pool is not initialized");
-
-        if (commandModel == null) throw new ArgumentNullException(nameof(commandModel));
+        _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
+        _isInitialized = true;
+        Plugin.Logger.Debug("Pool initialized successfully");
     }
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
-        try
-        {
-            var noteLineEnum = (NoteLineCustomEnum)commandModel.PositionIndex;
-            return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error($"Failed to calculate spawn position for index: {commandModel.PositionIndex}");
-            Plugin.Logger.Error(ex);
-            throw;
-        }
+        var noteLineEnum = (NoteLineCustomEnum) commandModel.PositionIndex;
+        return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
     }
 
     private void InitializeInstance(FaraBombComponentModel instance, BombCommandModel commandModel)
@@ -67,30 +42,21 @@ public class FaraBombManagementPoolController
         }
         catch (Exception ex)
         {
-            Plugin.Logger.Error("Failed to initialize instance components");
-            Plugin.Logger.Error(ex);
-            throw;
+            throw new FaraBombException(ex.Message, ErrorCode.InitializeInstanceError);
         }
     }
 
     public void Spawn(BombCommandModel commandModel)
     {
-        ValidateInitializationAndInput(commandModel);
-
         try
         {
             var spawnPosition = CalculateSpawnPosition(commandModel);
             var instance = _poolModel.Spawn(spawnPosition);
-
-            if (instance is null) throw new InvalidOperationException("Failed to spawn instance from pool");
-
             InitializeInstance(instance, commandModel);
         }
         catch (Exception ex)
         {
-            Plugin.Logger.Error($"Failed to spawn bomb with ID: {commandModel.BombId}");
-            Plugin.Logger.Error(ex);
-            throw;
+            throw new FaraBombException(ex.Message, ErrorCode.SpawnError);
         }
     }
 
@@ -102,21 +68,13 @@ public class FaraBombManagementPoolController
             return;
         }
 
-        if (instance is null)
-        {
-            Plugin.Logger.Warn("Attempting to despawn null instance");
-            return;
-        }
-
         try
         {
             _poolModel.Despawn(instance);
         }
         catch (Exception ex)
         {
-            Plugin.Logger.Error("Failed to despawn instance");
-            Plugin.Logger.Error(ex);
-            throw;
+            throw new FaraBombException(ex.Message, ErrorCode.DespawnError);
         }
     }
 
@@ -128,16 +86,7 @@ public class FaraBombManagementPoolController
             return [];
         }
 
-        try
-        {
-            return _poolModel.GetActiveItems().ToList();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Failed to get active items");
-            Plugin.Logger.Error(ex);
-            return [];
-        }
+        return _poolModel.GetActiveItems().ToList();
     }
 
     public void Cleanup()
@@ -152,8 +101,7 @@ public class FaraBombManagementPoolController
         }
         catch (Exception ex)
         {
-            Plugin.Logger.Error("Error during cleanup");
-            Plugin.Logger.Error(ex);
+            throw new FaraBombException(ex.Message, ErrorCode.CleanupError);
         }
     }
 }

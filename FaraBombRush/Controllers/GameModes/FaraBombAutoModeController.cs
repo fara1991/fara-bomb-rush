@@ -16,12 +16,12 @@ public class FaraBombAutoModeController : MonoBehaviour
 {
     private int _noteCutCount;
 
-    private readonly List<NotePositionEnum> _notePositionEnumList =
-        Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+    private readonly List<NotePosition> _notePositionEnumList =
+        Enum.GetValues(typeof(NotePosition)).Cast<NotePosition>().ToList();
     private const float BombLineDiffBeat = 1.0f;
 
     private int _bombId;
-    private FaraBombLevel _level;
+    private int _playerBombLevel;
     private PluginConfig _config;
 
     [Inject]
@@ -32,15 +32,16 @@ public class FaraBombAutoModeController : MonoBehaviour
 
 
     private void Start()
-    {
-        _level = FaraBombLevelExternal.GetLevel(_config.PlayerBombLevel);
+    {        Plugin.Logger.Debug("234");
+
+        _playerBombLevel = FaraBombLevelEnum.GetLevelIndex(_config.PlayerBombLevel);
     }
 
     private void Update()
     {
         // ノーツをN回切ったらボムを出す
-        if (_noteCutCount < 5) return;
-        _noteCutCount -= 5;
+        if (_noteCutCount < 180) return;
+        _noteCutCount -= 180;
         BombPush();
     }
 
@@ -50,7 +51,7 @@ public class FaraBombAutoModeController : MonoBehaviour
         _bombId = _bombId >= int.MaxValue ? 1 : _bombId + 1;
 
         var randomPercent = Random.Range(0, 100);
-        var patternList = FaraBombCreatePatternExternal.GetPattern(_level);
+        var patternList = FaraBombCreatePatternExternal.GetPattern(_playerBombLevel);
         // ここでどのパターンかを抽出
         var pattern = FaraBombCreatePatternEnum.BombSingle;
         var calcPercent = 0f;
@@ -86,7 +87,7 @@ public class FaraBombAutoModeController : MonoBehaviour
                     SpawnDelayTime = 0,
                     PositionIndex = posInt - 1
                 });
-                FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                 selectedPosList.Add(posInt);
             }
         }
@@ -101,7 +102,7 @@ public class FaraBombAutoModeController : MonoBehaviour
                     SpawnDelayTime = 0,
                     PositionIndex = i
                 });
-            FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+            FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
         }
         else if (pattern == FaraBombCreatePatternEnum.BombLineSingle || pattern == FaraBombCreatePatternEnum.BombLineDouble || pattern == FaraBombCreatePatternEnum.BombLineTriple)
         {
@@ -120,7 +121,7 @@ public class FaraBombAutoModeController : MonoBehaviour
                         SpawnDelayTime = BombLineDiffBeat * j,
                         PositionIndex = posInt - j
                     });
-                FaraBombPoolManager.CommandQueue.Enqueue(bombCommandListModel);
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                 selectedPosList.Add(posInt);
             }
         }

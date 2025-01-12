@@ -18,7 +18,7 @@ public class FaraBombMoveController : FaraBombComponentBase
         Move();
     }
 
-    public override void Initialize()
+    public override void InitializeComponent()
     {
         _noteJumpSpeed = DefaultNoteJumpSpeed;
         Plugin.Logger.Debug("Initializing BombController");

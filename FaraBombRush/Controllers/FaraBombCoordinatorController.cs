@@ -5,6 +5,7 @@ using FaraBombRush.Interfaces;
 using FaraBombRush.Models;
 using UnityEngine;
 using FaraBombRush.Controllers.Components;
+using UnityEngine.Serialization;
 
 namespace FaraBombRush.Controllers;
 
@@ -12,34 +13,38 @@ public class FaraBombCoordinatorController : MonoBehaviour
 {
     // Components
     private readonly List<IFaraBombComponent> _components = [];
-    private FaraBombColliderController _collider;
-    private FaraBombEffectController _effect;
-    private FaraBombMoveController _movement;
+    private FaraBombColliderController _colliderComponent;
+    private FaraBombEffectController _effectComponent;
+    private FaraBombMoveController _movementComponent;
 
-    private FaraBombStateEnum _currentState = FaraBombStateEnum.Idle;
+    private FaraBombStateEnum _currentStateEnum = FaraBombStateEnum.Idle;
+    private FaraBombCalcScoreEnum.ScoreMode _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.None;
 
     public void Setup(
-        FaraBombColliderController collider = null,
-        FaraBombMoveController movement = null,
-        FaraBombEffectController effect = null)
+        FaraBombColliderController colliderComponent = null,
+        FaraBombMoveController movementComponent = null,
+        FaraBombEffectController effectComponent = null)
     {
         _components.Clear();
-        if (collider is not null)
+        if (colliderComponent is not null)
         {
-            _collider = collider;
-            _components.Add(_collider);
+            _colliderComponent = colliderComponent;
+            _components.Add(_colliderComponent);
+            _colliderComponent.Enable();
         }
 
-        if (movement is not null)
+        if (movementComponent is not null)
         {
-            _movement = movement;
-            _components.Add(_movement);
+            _movementComponent = movementComponent;
+            _components.Add(_movementComponent);
+            _movementComponent.Enable();
         }
 
-        if (effect is not null)
+        if (effectComponent is not null)
         {
-            _effect = effect;
-            _components.Add(_effect);
+            _effectComponent = effectComponent;
+            _components.Add(_effectComponent);
+            _effectComponent.Enable();
         }
     }
 
@@ -47,7 +52,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
-        _currentState = FaraBombStateEnum.Idle;
+        _currentStateEnum = FaraBombStateEnum.Idle;
 
         // 初期化後すぐに移動状態に遷移
         TransitionTo(FaraBombStateEnum.Move);
@@ -55,7 +60,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
 
     public void UpdateState()
     {
-        switch (_currentState)
+        switch (_currentStateEnum)
         {
             case FaraBombStateEnum.Idle:
                 break;
@@ -70,23 +75,28 @@ public class FaraBombCoordinatorController : MonoBehaviour
 
     private void HandleMoveState()
     {
-        if (_movement is not null && _movement.LimitPosition())
-            TransitionTo(FaraBombStateEnum.Idle);
-        else if (_collider is not null)
+        if (_movementComponent is not null && _movementComponent.LimitPosition())
         {
-            if (_collider.CollisionLeftSaber() || _collider.CollisionRightSaber())
-                TransitionTo(FaraBombStateEnum.Explosion);
+            TransitionTo(FaraBombStateEnum.Idle);
+            // 
+            _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.AddScore;
+        }
+        else if (_colliderComponent is not null)
+        {
+            if (!_colliderComponent.CollisionLeftSaber() && !_colliderComponent.CollisionRightSaber()) return;
+            TransitionTo(FaraBombStateEnum.Explosion);
+            _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.SubtractScore;
         }
     }
 
     private void HandleExplosionState()
     {
-        if (_effect is not null && _effect.ExplosionCompleted()) TransitionTo(FaraBombStateEnum.Idle);
+        if (_effectComponent is not null && _effectComponent.ExplosionCompleted()) TransitionTo(FaraBombStateEnum.Idle);
     }
 
     private void TransitionTo(FaraBombStateEnum newState)
     {
-        _currentState = newState;
+        _currentStateEnum = newState;
         OnStateEnter(newState);
         Plugin.Logger.Debug($"Enabling {newState.ToString()}");
     }
@@ -96,25 +106,32 @@ public class FaraBombCoordinatorController : MonoBehaviour
         switch (state)
         {
             case FaraBombStateEnum.Idle:
-                _movement?.Disable();
-                _collider?.Disable();
-                _effect?.Disable();
+                _movementComponent?.Disable();
+                _colliderComponent?.Disable();
+                _effectComponent?.Disable();
                 break;
             case FaraBombStateEnum.Move:
-                _movement?.Enable();
-                _collider?.Enable();
-                _effect?.Disable();
+                _movementComponent?.Enable();
+                _colliderComponent?.Enable();
+                _effectComponent?.Disable();
                 break;
             case FaraBombStateEnum.Explosion:
-                _movement?.Disable();
-                _collider?.Disable();
-                _effect?.Enable();
+                _movementComponent?.Disable();
+                _colliderComponent?.Disable();
+                _effectComponent?.Enable();
                 break;
         }
     }
 
     public bool IsInvalid()
     {
-        return _currentState == FaraBombStateEnum.Idle;
+        return _currentStateEnum == FaraBombStateEnum.Idle;
+    }
+
+    public FaraBombCalcScoreEnum.ScoreMode GetScoreMode()
+    {
+        var scoreMode = _calcScoreMode;
+        _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.None;
+        return scoreMode;
     }
 }

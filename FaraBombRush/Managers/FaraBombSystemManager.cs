@@ -5,13 +5,17 @@ using System.IO;
 using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
+using FaraBombRush.Controllers.Components;
+using FaraBombRush.Enums;
+using static FaraBombRush.Enums.ErrorCodeEnum;
+using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
 using UnityEngine;
 using Zenject;
 
 namespace FaraBombRush.Managers;
 
-public class FaraBombPoolManager : MonoBehaviour
+public class FaraBombSystemManager : MonoBehaviour
 {
     private const string FaraBombAssetName = "FaraBomb";
     private const int MaxOnceAddBomb = 3;
@@ -21,6 +25,9 @@ public class FaraBombPoolManager : MonoBehaviour
     private readonly string _faraBombAssetPath =
         Path.Combine(Environment.CurrentDirectory, "UserData", "FaraBombRush", "farabomb.particle");
 
+    private readonly string _faraBombScorePath =
+        Path.Combine(Environment.CurrentDirectory, "UserData", "FaraBombRush", "score.txt");
+
     private AssetBundle _assetBundle;
     private PluginConfig _config;
 
@@ -29,6 +36,7 @@ public class FaraBombPoolManager : MonoBehaviour
 
     // プール管理
     private FaraBombManagementPoolController _poolController;
+    private FaraBombScoreController _scoreController;
     private int _waitFrame;
 
     // コマンドキュー
@@ -48,66 +56,39 @@ public class FaraBombPoolManager : MonoBehaviour
             return;
         }
 
-        try
-        {
-            InitializeComponents();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Failed to initialize FaraBombPoolManager");
-            Plugin.Logger.Error(ex);
-            enabled = false;
-        }
+        InitializeComponents();
     }
 
     private void Update()
     {
         if (!enabled || !_config.IsBombCommandEnable) return;
 
-        try
-        {
-            ProcessCommandQueue();
-            UpdateActiveBombs();
-            CleanupInvalidBombs();
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Error in Update");
-            Plugin.Logger.Error(ex);
-        }
+        ProcessCommandQueue();
+        UpdateActiveBombs();
+        CleanupInvalidBombs();
+        SaveFaraBombScore();
     }
 
     private void OnDestroy()
     {
-        try
-        {
-            _poolController?.Cleanup();
-            if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
-            _assetBundle?.Unload(true);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Error during cleanup");
-            Plugin.Logger.Error(ex);
-        }
+        _poolController?.Cleanup();
+        if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
+        _assetBundle?.Unload(true);
     }
 
     private void InitializeComponents()
     {
         InitializePrefabs();
+        InitializeScore();
         InitializePool();
     }
 
     private void InitializePrefabs()
     {
-        _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
-        if (_assetBundle is null)
-            throw new InvalidOperationException($"Failed to load AssetBundle from {_faraBombAssetPath}");
-
         try
         {
+            _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
-            if (prefab is null) throw new InvalidOperationException("FaraBombEffect asset not found in bundle");
 
             // レンダラーの状態を確認
             var renderers = prefab.GetComponentsInChildren<Renderer>(true);
@@ -125,6 +106,7 @@ public class FaraBombPoolManager : MonoBehaviour
                     shader = Shader.Find("Standard")
                 };
 
+                // 紫以外ありえない
                 if (newMaterial.HasProperty(ShaderColor))
                     newMaterial.SetColor(ShaderColor, new Color(192f / 255f, 64f / 255f, 255f / 255f));
 
@@ -135,44 +117,35 @@ public class FaraBombPoolManager : MonoBehaviour
             _faraBombManagementPrefab.SetActive(false);
 
             Destroy(prefab);
+            Plugin.Logger.Debug("FaraBomb prefab initialized successfully");
         }
         catch (Exception ex)
         {
-            Plugin.Logger.Error("Failed to load effect prefab");
-            Plugin.Logger.Error(ex);
-            throw;
+            throw new FaraBombException(ex.Message, ErrorCode.DoesNotExistPrefab);
         }
+    }
+
+    private void InitializeScore()
+    {
+        _scoreController = gameObject.AddComponent<FaraBombScoreController>();
+        _scoreController.Enable();
+        Plugin.Logger.Debug("ScoreSystem initialized successfully");
     }
 
     private void InitializePool()
     {
-        try
-        {
-            _poolController = new FaraBombManagementPoolController();
-            _poolController.Initialize(_faraBombManagementPrefab, _config);
-            Plugin.Logger.Debug("Pool initialized successfully");
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error("Failed to initialize pool");
-            Plugin.Logger.Error(ex);
-            throw;
-        }
+        _poolController = new FaraBombManagementPoolController();
+        _poolController.Initialize(_faraBombManagementPrefab, _config);
+        Plugin.Logger.Debug("Pool initialized successfully");
     }
 
     private void ProcessCommandQueue()
     {
-        if (!ShouldProcessCommands()) return;
+        _waitFrame++;
+        if (_waitFrame % WaitAddBombFrame != 0) return;
 
         _waitFrame = 0;
-
         if (CommandQueue.TryDequeue(out var commands)) ProcessCommands(commands);
-    }
-
-    private bool ShouldProcessCommands()
-    {
-        _waitFrame++;
-        return _waitFrame % WaitAddBombFrame == 0;
     }
 
     private void ProcessCommands(List<BombCommandModel> commands)
@@ -185,20 +158,8 @@ public class FaraBombPoolManager : MonoBehaviour
             .ToList();
 
         // 選択されたbombIdに対応するコマンドを処理
-        foreach (var command in commands.Where(cmd => selectedBombIds.Contains(cmd.BombId))) SpawnBomb(command);
-    }
-
-    private void SpawnBomb(BombCommandModel command)
-    {
-        try
-        {
+        foreach (var command in commands.Where(cmd => selectedBombIds.Contains(cmd.BombId)))
             _poolController.Spawn(command);
-        }
-        catch (Exception ex)
-        {
-            Plugin.Logger.Error($"Failed to spawn bomb {command.BombId}");
-            Plugin.Logger.Error(ex);
-        }
     }
 
     private void UpdateActiveBombs()
@@ -208,10 +169,45 @@ public class FaraBombPoolManager : MonoBehaviour
 
     private void CleanupInvalidBombs()
     {
-        var invalidBombs = _poolController.GetActiveItems()
+        var activeItems = _poolController.GetActiveItems();
+        foreach (var component in activeItems)
+        {
+            switch (component.GetFaraBombScoreMode())
+            {
+                case FaraBombCalcScoreEnum.ScoreMode.AddScore:
+                    _scoreController.BombThrough();
+                    break;
+                case FaraBombCalcScoreEnum.ScoreMode.SubtractScore:
+                    _scoreController.BombCut();
+                    break;
+            }
+        }
+
+        var invalidBombs = activeItems
             .Where(bomb => bomb.IsInvalid())
             .ToList();
 
         foreach (var bomb in invalidBombs) _poolController.Despawn(bomb);
+    }
+
+    private void SaveFaraBombScore()
+    {
+        var score = _scoreController.FaraBombScore;
+        var comboRate = _scoreController.FaraBombComboRate;
+        var throughCount = _scoreController.FaraBombThroughCount;
+        var throughComboCount = _scoreController.FaraBombThroughComboCount;
+        var level = _scoreController.MagnificationByLevel;
+
+        using var writer = new StreamWriter(_faraBombScorePath, false);
+        writer.WriteLine(
+            $"""
+             FaraBombRush Debug
+             Score: {score}
+             ComboRate: {comboRate}
+             ThroughCount: {throughCount}
+             ThroughComboCount: {throughComboCount}
+             Level: {level}
+             """
+        );
     }
 }

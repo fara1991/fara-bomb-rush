@@ -17,7 +17,7 @@ public class FaraBombEffectController : FaraBombComponentBase
         if (_counter >= EffectCounter) Disable();
     }
 
-    public override void Initialize()
+    public override void InitializeComponent()
     {
         // エフェクトオブジェクトの表示/非表示制御
         gameObject.SetActive(false);
