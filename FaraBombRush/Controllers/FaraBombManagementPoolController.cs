@@ -4,6 +4,7 @@ using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using static FaraBombRush.Enums.ErrorCodeEnum;
+using static FaraBombRush.Enums.GamePauseStepEnum;
 using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
 using UnityEngine;
@@ -30,7 +31,7 @@ public class FaraBombManagementPoolController
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
-        var noteLineEnum = (NoteLineCustomEnum) commandModel.PositionIndex;
+        var noteLineEnum = (NoteLineCustomEnum)commandModel.PositionIndex;
         return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
     }
 
@@ -102,6 +103,14 @@ public class FaraBombManagementPoolController
         catch (Exception ex)
         {
             throw new FaraBombException(ex.Message, ErrorCode.CleanupError);
+        }
+    }
+
+    public void SetPause(GamePauseStep pauseStep)
+    {
+        foreach (var item in GetActiveItems())
+        {
+            item.SetPause(pauseStep);
         }
     }
 }

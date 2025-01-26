@@ -3,6 +3,8 @@ using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
 using FaraBombRush.Enums;
 using UnityEngine;
+using static FaraBombRush.Enums.GamePauseStepEnum;
+using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
 
 namespace FaraBombRush.Models;
 
@@ -21,6 +23,8 @@ public class FaraBombComponentModel : MonoBehaviour
     private GameObject RootObject { get; set; }
     private GameObject BombObject { get; set; }
     private GameObject EffectObject { get; set; }
+
+    private GamePauseStep _gamePauseStep = GamePauseStep.Resume;
 
     private void OnDisable()
     {
@@ -97,7 +101,34 @@ public class FaraBombComponentModel : MonoBehaviour
         return Coordinator.IsInvalid();
     }
 
-    public FaraBombCalcScoreEnum.ScoreMode GetFaraBombScoreMode()
+    internal void SetPause(GamePauseStep pauseStep)
+    {
+        if (_gamePauseStep == pauseStep) return;
+
+        switch (pauseStep)
+        {
+            case GamePauseStep.Pause:
+                RootObject.SetActive(false);
+                break;
+            case GamePauseStep.WillResume:
+                RootObject.SetActive(true);
+                Coordinator.enabled = true;
+                Collider.enabled = false;
+                Move.enabled = false;
+                Effect.enabled = false;
+                break;
+            case GamePauseStep.Resume:
+                RootObject.SetActive(true);
+                Coordinator.enabled = true;
+                Collider.enabled = true;
+                Move.enabled = true;
+                Effect.enabled = true;
+                break;
+        }
+        _gamePauseStep = pauseStep;
+    }
+
+    public ScoreMode GetFaraBombScoreMode()
     {
         return Coordinator.GetScoreMode();
     }

@@ -1,59 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
-using UnityEngine;
-using Zenject;
 using static FaraBombRush.Enums.NoteLineCustomEnum;
+using static FaraBombRush.Enums.FaraBombCreatePatternEnum;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers.GameModes;
 
-public class FaraBombAutoModeController : MonoBehaviour
+public class FaraBombAutoModeController : FaraBombGameModeBase
 {
     private int _noteCutCount;
-
-    private readonly List<NotePosition> _notePositionEnumList =
-        Enum.GetValues(typeof(NotePosition)).Cast<NotePosition>().ToList();
-    private const float BombLineDiffBeat = 1.0f;
-
-    private int _bombId;
     private int _playerBombLevel;
-    private PluginConfig _config;
-
-    [Inject]
-    private void Construct(PluginConfig config)
-    {
-        _config = config;
-    }
-
 
     private void Start()
-    {        Plugin.Logger.Debug("234");
-
-        _playerBombLevel = FaraBombLevelEnum.GetLevelIndex(_config.PlayerBombLevel);
+    {
+        _playerBombLevel = FaraBombLevelEnum.GetLevelIndex(Config.PlayerBombLevel);
     }
 
     private void Update()
     {
-        // ノーツをN回切ったらボムを出す
-        if (_noteCutCount < 180) return;
-        _noteCutCount -= 180;
         BombPush();
     }
 
-    public void BombPush()
+    protected override void BombPush()
+    {
+        if (_noteCutCount < 180)
+        {
+            _noteCutCount++;
+        }
+        else
+        {
+            _noteCutCount -= 180;
+            CalcBombPattern();
+        }
+    }
+
+    private void CalcBombPattern()
     {
         // bomb制御用に適用なIDを付与
-        _bombId = _bombId >= int.MaxValue ? 1 : _bombId + 1;
+        BombId = BombId >= int.MaxValue ? 1 : BombId + 1;
 
-        var randomPercent = Random.Range(0, 100);
-        var patternList = FaraBombCreatePatternExternal.GetPattern(_playerBombLevel);
+        var randomPercent = Random.Range(0f, 100f);
+        var patternList = GetPattern(_playerBombLevel);
         // ここでどのパターンかを抽出
-        var pattern = FaraBombCreatePatternEnum.BombSingle;
+        var pattern = FaraBombCreatePattern.BombSingle;
         var calcPercent = 0f;
         foreach (var test in patternList)
         {
@@ -65,65 +57,78 @@ public class FaraBombAutoModeController : MonoBehaviour
             }
         }
 
-        var posInt = Random.Range(1, _notePositionEnumList.Count);
+        var posInt = Random.Range(1, NotePositionEnumList.Count);
         var selectedPosList = new List<int>();
 
         var bombCommandListModel = new List<BombCommandModel>();
-        if (pattern == FaraBombCreatePatternEnum.BombSingle ||
-            pattern == FaraBombCreatePatternEnum.BombDouble ||
-            pattern == FaraBombCreatePatternEnum.BombTriple)
+        switch (pattern)
         {
-            var start = 0;
-            var end = int.Parse(pattern.ToString()) + 1;
-            for (var i = start; i < end; i++)
-            {
-                while (selectedPosList.Contains(posInt))
+            case FaraBombCreatePattern.BombSingle:
+            case FaraBombCreatePattern.BombDouble:
+            case FaraBombCreatePattern.BombTriple:
                 {
-                    posInt = Random.Range(1, _notePositionEnumList.Count);
-                }
-                bombCommandListModel.Add(new BombCommandModel
-                {
-                    BombId = _bombId,
-                    SpawnDelayTime = 0,
-                    PositionIndex = posInt - 1
-                });
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                selectedPosList.Add(posInt);
-            }
-        }
-
-        else if (pattern == FaraBombCreatePatternEnum.BombReset)
-        {
-            SearchStartAndEndPosition(posInt, out var start, out var end);
-            for (var i = start; i <= end; i++)
-                bombCommandListModel.Add(new BombCommandModel
-                {
-                    BombId = _bombId,
-                    SpawnDelayTime = 0,
-                    PositionIndex = i
-                });
-            FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-        }
-        else if (pattern == FaraBombCreatePatternEnum.BombLineSingle || pattern == FaraBombCreatePatternEnum.BombLineDouble || pattern == FaraBombCreatePatternEnum.BombLineTriple)
-        {
-            var start = int.Parse(pattern.ToString()) - 4;
-            var end = int.Parse(pattern.ToString()) - 2;
-            for (var i = start; i < end; i++)
-            {
-                while (selectedPosList.Contains(posInt))
-                {
-                    posInt = Random.Range(1, _notePositionEnumList.Count);
-                }
-                for (var j = 0; j < _config.BombLineCount; j++)
-                    bombCommandListModel.Add(new BombCommandModel
+                    var start = 0;
+                    var end = GetPatternIndex(pattern.ToString()) + 1;
+                    for (var i = start; i < end; i++)
                     {
-                        BombId = _bombId,
-                        SpawnDelayTime = BombLineDiffBeat * j,
-                        PositionIndex = posInt - j
-                    });
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                selectedPosList.Add(posInt);
-            }
+                        while (selectedPosList.Contains(posInt))
+                        {
+                            posInt = Random.Range(1, NotePositionEnumList.Count);
+                        }
+
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = 0,
+                            PositionIndex = posInt - 1
+                        });
+                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                        selectedPosList.Add(posInt);
+                    }
+
+                    break;
+                }
+            case FaraBombCreatePattern.BombReset:
+                {
+                    SearchStartAndEndPosition(posInt, out var start, out var end);
+                    for (var i = start; i <= end; i++)
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = 0,
+                            PositionIndex = i
+                        });
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    break;
+                }
+            case FaraBombCreatePattern.BombLineSingle:
+            case FaraBombCreatePattern.BombLineDouble:
+            case FaraBombCreatePattern.BombLineTriple:
+                {
+                    var start = 0;
+                    var end = GetPatternIndex(pattern.ToString()) - 3;
+                    for (var i = start; i < end; i++)
+                    {
+                        while (selectedPosList.Contains(posInt))
+                        {
+                            posInt = Random.Range(1, NotePositionEnumList.Count);
+                        }
+
+                        for (var j = 0; j < Config.BombLineCount; j++)
+                            bombCommandListModel.Add(new BombCommandModel
+                            {
+                                BombId = BombId,
+                                SpawnDelayTime = BombLineDiffBeat * j,
+                                PositionIndex = posInt - j
+                            });
+                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                        selectedPosList.Add(posInt);
+                    }
+
+                    break;
+                }
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 

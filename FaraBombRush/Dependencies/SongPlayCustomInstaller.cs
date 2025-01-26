@@ -38,10 +38,10 @@ public class SongPlayCustomInstaller : Installer
         Container.Bind<FaraBombScoreController>().FromNewComponentOnNewGameObject().AsTransient();
 
         // Play Mode
+        Container.BindInterfacesAndSelfTo<FaraBombGameModeBase>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
         if (_config.GameMode == GameModeEnum.Interactive.ToString())
         {
-            Container.BindInterfacesAndSelfTo<ChatCoreWrapperController>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
-            Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().AsCached().NonLazy();
+            Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
         }
         else if (_config.GameMode == GameModeEnum.Auto.ToString())
         {

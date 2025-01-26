@@ -15,7 +15,7 @@ public class ErrorCodeEnum
         DespawnError = 101002,
         CleanupError = 101003,
     }
-    
+
     public static int GetErrorCodeIndex(string errorCode)
     {
         if (Enum.TryParse(errorCode, out ErrorCode code))

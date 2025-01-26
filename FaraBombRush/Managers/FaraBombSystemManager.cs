@@ -6,12 +6,14 @@ using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
-using FaraBombRush.Enums;
+using static FaraBombRush.Enums.GamePauseStepEnum;
 using static FaraBombRush.Enums.ErrorCodeEnum;
+using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
 using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
 using UnityEngine;
 using Zenject;
+using FaraBombRush.Patches;
 
 namespace FaraBombRush.Managers;
 
@@ -63,6 +65,8 @@ public class FaraBombSystemManager : MonoBehaviour
     {
         if (!enabled || !_config.IsBombCommandEnable) return;
 
+        FaraBombComponentPause(GamePausePatch.GamePauseStep);
+        if (GamePausePatch.GamePauseStep != GamePauseStep.Resume) return;
         ProcessCommandQueue();
         UpdateActiveBombs();
         CleanupInvalidBombs();
@@ -174,10 +178,10 @@ public class FaraBombSystemManager : MonoBehaviour
         {
             switch (component.GetFaraBombScoreMode())
             {
-                case FaraBombCalcScoreEnum.ScoreMode.AddScore:
+                case ScoreMode.AddScore:
                     _scoreController.BombThrough();
                     break;
-                case FaraBombCalcScoreEnum.ScoreMode.SubtractScore:
+                case ScoreMode.SubtractScore:
                     _scoreController.BombCut();
                     break;
             }
@@ -209,5 +213,10 @@ public class FaraBombSystemManager : MonoBehaviour
              Level: {level}
              """
         );
+    }
+
+    private void FaraBombComponentPause(GamePauseStep pauseStep)
+    {
+        _poolController.SetPause(pauseStep);
     }
 }

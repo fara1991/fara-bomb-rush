@@ -23,7 +23,7 @@ public class FaraBombLevelEnum
         }
 
         Plugin.Logger.Error($"Unknown player level: {levelName}");
-        return (int) PlayerLevel.Normal;
+        return (int)PlayerLevel.Normal;
     }
 
     public static PlayerLevel GetLevel(float pp)

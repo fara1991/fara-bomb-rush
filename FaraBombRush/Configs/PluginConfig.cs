@@ -15,7 +15,7 @@ public class PluginConfig
     public float BombSpawnDistance { get; set; } = 30.0f;
     public int BombLineCount { get; set; } = 5;
     public string PlayerBombLevel { get; set; } = FaraBombLevelEnum.PlayerLevel.Normal.ToString();
-    
+
     // 特殊設定
     public bool IsAprilFoolMode { get; set; } = false;
 }

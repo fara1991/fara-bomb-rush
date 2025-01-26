@@ -47,7 +47,7 @@ public class FaraBombScoreController : FaraBombComponentBase
     {
         if (!Mathf.Approximately(FaraBombComboRate, MaxComboRate))
         {
-            foreach (var item in _faraBombComboRatesByThroughCount.Select((value, index) => new {value, index}))
+            foreach (var item in _faraBombComboRatesByThroughCount.Select((value, index) => new { value, index }))
             {
                 if (FaraBombThroughCount >= item.value)
                 {

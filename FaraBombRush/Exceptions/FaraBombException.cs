@@ -8,7 +8,7 @@ namespace FaraBombRush.Exceptions;
 public class FaraBombException : Exception
 {
     private int ErrorCode { get; set; }
-    
+
     // メッセージを受け取るコンストラクタ
     public FaraBombException(string errorMessage) : base(errorMessage)
     {

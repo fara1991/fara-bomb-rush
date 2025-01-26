@@ -5,6 +5,7 @@ using FaraBombRush.Interfaces;
 using FaraBombRush.Models;
 using UnityEngine;
 using FaraBombRush.Controllers.Components;
+using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
 using UnityEngine.Serialization;
 
 namespace FaraBombRush.Controllers;
@@ -18,7 +19,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
     private FaraBombMoveController _movementComponent;
 
     private FaraBombStateEnum _currentStateEnum = FaraBombStateEnum.Idle;
-    private FaraBombCalcScoreEnum.ScoreMode _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.None;
+    private ScoreMode _calcScoreMode = ScoreMode.None;
 
     public void Setup(
         FaraBombColliderController colliderComponent = null,
@@ -78,14 +79,13 @@ public class FaraBombCoordinatorController : MonoBehaviour
         if (_movementComponent is not null && _movementComponent.LimitPosition())
         {
             TransitionTo(FaraBombStateEnum.Idle);
-            // 
-            _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.AddScore;
+            _calcScoreMode = ScoreMode.AddScore;
         }
         else if (_colliderComponent is not null)
         {
             if (!_colliderComponent.CollisionLeftSaber() && !_colliderComponent.CollisionRightSaber()) return;
             TransitionTo(FaraBombStateEnum.Explosion);
-            _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.SubtractScore;
+            _calcScoreMode = ScoreMode.SubtractScore;
         }
     }
 
@@ -128,10 +128,10 @@ public class FaraBombCoordinatorController : MonoBehaviour
         return _currentStateEnum == FaraBombStateEnum.Idle;
     }
 
-    public FaraBombCalcScoreEnum.ScoreMode GetScoreMode()
+    public ScoreMode GetScoreMode()
     {
         var scoreMode = _calcScoreMode;
-        _calcScoreMode = FaraBombCalcScoreEnum.ScoreMode.None;
+        _calcScoreMode = ScoreMode.None;
         return scoreMode;
     }
 }

@@ -41,7 +41,6 @@
         <DisableZipRelease>True</DisableZipRelease>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Controllers\ChatCoreWrapperController.cs"/>
         <Compile Include="Controllers\Components\FaraBombColliderController.cs" />
         <Compile Include="Controllers\Components\FaraBombEffectController.cs" />
         <Compile Include="Controllers\Components\FaraBombMoveController.cs" />
@@ -49,18 +48,20 @@
         <Compile Include="Controllers\FaraBombCoordinatorController.cs" />
         <Compile Include="Controllers\FaraBombManagementPoolController.cs" />
         <Compile Include="Controllers\GameModes\FaraBombAutoModeController.cs" />
+        <Compile Include="Controllers\GameModes\FaraBombGameModeBase.cs" />
         <Compile Include="Controllers\GameModes\FaraBombInteractiveModeController.cs" />
         <Compile Include="Dependencies\GameCustomInstaller.cs" />
         <Compile Include="Dependencies\SongPlayCustomInstaller.cs" />
         <Compile Include="Enums\ErrorCodeEnum.cs" />
         <Compile Include="Enums\FaraBombCalcScoreEnum.cs" />
-        <Compile Include="Enums\FaraBombCreatePatternEnum.cs" />
+        <Compile Include="Enums\FaraBombCreatePattern.cs" />
         <Compile Include="Enums\FaraBombExplosionPhaseEnum.cs" />
         <Compile Include="Enums\FaraBombLevelEnum.cs" />
         <Compile Include="Enums\FaraBombStateEnum.cs" />
         <Compile Include="Enums\FaraBombNameEnum.cs" />
         <Compile Include="Enums\GameModeEnum.cs" />
         <Compile Include="Enums\NoteLineCustomEnum.cs" />
+        <Compile Include="Enums\GamePauseStepEnum.cs" />
         <Compile Include="Enums\SaberObjectEnum.cs" />
         <Compile Include="Exceptions\FaraBombException.cs" />
         <Compile Include="Interfaces\FaraBombComponentBase.cs" />
@@ -69,6 +70,7 @@
         <Compile Include="Models\BombCommandModel.cs" />
         <Compile Include="Models\FaraBombComponentModel.cs" />
         <Compile Include="Models\FaraBombManagementPoolModel.cs" />
+        <Compile Include="Patches\GamePausePatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Configs\PluginConfig.cs" />
@@ -101,14 +103,6 @@
             <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
-        <Reference Include="BeatmapCore">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
-        </Reference>
-        <Reference Include="BeatmapCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <Private>False</Private>
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
-            <SpecificVersion>False</SpecificVersion>
-        </Reference>
         <Reference Include="BSML">
             <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
         </Reference>
@@ -125,15 +119,14 @@
             <HintPath>$(BeatSaberDir)\Libs\ChatCore.dll</HintPath>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
-        <Reference Include="GameplayCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
         <Reference Include="HMLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-        <Reference Include="HMRendering">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
-        </Reference>
         <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
             <Private>False</Private>
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
             <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="HttpSiraStatus">
+          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\HttpSiraStatus.dll</HintPath>
         </Reference>
         <Reference Include="IPA.Injector, Version=4.2.2.0, Culture=neutral, processorArchitecture=MSIL">
             <Private>False</Private>
@@ -165,19 +158,9 @@
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
-        <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <Private>False</Private>
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
-            <SpecificVersion>False</SpecificVersion>
-        </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
             <Private>False</Private>
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-            <SpecificVersion>False</SpecificVersion>
-        </Reference>
-        <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <Private>False</Private>
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
