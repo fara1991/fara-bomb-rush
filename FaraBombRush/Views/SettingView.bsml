@@ -1,0 +1,57 @@
+﻿<vertical child-control-height="false">
+    <!-- title -->
+    <horizontal bg="panel-top" pad-left="10" pad-right="10" horizontal-fit="PreferredSize">
+        <text text="Settings" align="Center" font-size="10"/>
+    </horizontal>
+
+    <vertical ignore-layout='true' pad-top='20' spacing='0.7'
+              child-control-height='false' child-expand-height='false'>
+
+        <!-- ゲームモードの設定 -->
+        <horizontal horizontal-fit='PreferredSize' spacing='12'>
+            <list-setting
+                    id="game-mode" text="Play Mode" options="game-mode-options" value="selected-game-mode"
+                    integer-only="false" apply-on-change="true"
+                    hover-hint="Choose a game mode to play"
+            />
+        </horizontal>
+
+        <!-- ボムコマンド有効判定 -->
+        <horizontal horizontal-fit='PreferredSize' spacing='12'>
+            <checkbox-setting
+                    id="game-mode" text="Valid Bomb Command" value="selected-is-bomb-command-enable"
+                    apply-on-change="true"
+                    hover-hint="Choose bomb command"
+            />
+        </horizontal>
+
+        <!-- ボム当たり判定 -->
+        <horizontal horizontal-fit='PreferredSize' spacing='12'>
+            <checkbox-setting
+                    id="game-mode" text="Valid Bomb Collision" value="selected-is-bomb-cut-enable"
+                    apply-on-change="true"
+                    hover-hint="Choose bomb collision"
+            />
+        </horizontal>
+
+        <!-- ボム数の設定 -->
+        <horizontal horizontal-fit='PreferredSize' spacing='12'>
+            <increment-setting
+                    id="bomb-count" text="One Shot Bomb Line Count" value="selected-bomb-line-count" min="5" max="10"
+                    increment="1"
+                    integer-only="true" apply-on-change="true"
+                    hover-hint="A row of bombs appearing at once"
+            />
+        </horizontal>
+
+        <!-- Bomb出現場所の設定 -->
+        <horizontal horizontal-fit='PreferredSize' spacing='10'>
+            <increment-setting
+                    id="bomb-spawn-distance" text="Bomb Spawn Distance" value="selected-bomb-spawn-distance"
+                    min="20.0" max="50.0" increment="5.0"
+                    integer-only="true" apply-on-change="true"
+                    hover-hint="Adjust the distance at which bombs appear"
+            />
+        </horizontal>
+    </vertical>
+</vertical>
