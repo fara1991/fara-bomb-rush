@@ -9,7 +9,7 @@ namespace FaraBombRush.Configs;
 public class PluginConfig
 {
     // 通常設定
-    public string GameMode { get; set; } = GameModeEnum.Interactive.ToString();
+    public string GameMode { get; set; } = GameModeEnum.None.ToString();
     public bool IsBombCommandEnable { get; set; } = true;
     public bool IsBombCutEnable { get; set; } = true;
     public float BombSpawnDistance { get; set; } = 30.0f;

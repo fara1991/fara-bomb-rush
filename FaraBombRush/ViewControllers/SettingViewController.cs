@@ -11,8 +11,14 @@ namespace FaraBombRush.ViewControllers;
 
 public class SettingViewController : BSMLResourceViewController
 {
-    [Inject] private readonly PluginConfig _config;
+    private PluginConfig _config;
 
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
+    }
+    
     [UIValue("game-mode-options")]
     private List<object> GameModeOptions = Enum.GetNames(typeof(GameModeEnum)).ToList<object>();
 

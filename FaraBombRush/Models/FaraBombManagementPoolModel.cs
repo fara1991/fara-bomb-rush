@@ -9,7 +9,7 @@ namespace FaraBombRush.Models;
 
 public class FaraBombManagementPoolModel
 {
-    private const int InitialSize = 50;
+    private const int InitialSize = 100;
     private readonly HashSet<FaraBombComponentModel> _activeItems;
     private readonly Queue<FaraBombComponentModel> _pool;
     private readonly GameObject _rootPrefab;

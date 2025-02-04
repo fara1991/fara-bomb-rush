@@ -69,6 +69,8 @@ public class FaraBombAutoModeController : FaraBombGameModeBase
                 {
                     var start = 0;
                     var end = GetPatternIndex(pattern.ToString()) + 1;
+                    Plugin.Logger.Debug("Single");
+                    Plugin.Logger.Debug(start.ToString() + ", " + end.ToString());
                     for (var i = start; i < end; i++)
                     {
                         while (selectedPosList.Contains(posInt))
@@ -82,22 +84,26 @@ public class FaraBombAutoModeController : FaraBombGameModeBase
                             SpawnDelayTime = 0,
                             PositionIndex = posInt - 1
                         });
-                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                         selectedPosList.Add(posInt);
                     }
-
+                    
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                     break;
                 }
             case FaraBombCreatePattern.BombReset:
                 {
                     SearchStartAndEndPosition(posInt, out var start, out var end);
+                    Plugin.Logger.Debug("Reset");
+                    Plugin.Logger.Debug(start.ToString() + ", " + end.ToString());
                     for (var i = start; i <= end; i++)
+                    {
                         bombCommandListModel.Add(new BombCommandModel
                         {
                             BombId = BombId,
                             SpawnDelayTime = 0,
                             PositionIndex = i
                         });
+                    }
                     FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                     break;
                 }
@@ -107,6 +113,8 @@ public class FaraBombAutoModeController : FaraBombGameModeBase
                 {
                     var start = 0;
                     var end = GetPatternIndex(pattern.ToString()) - 3;
+                    Plugin.Logger.Debug("Double, Triple");
+                    Plugin.Logger.Debug(start.ToString() + ", " + end.ToString());
                     for (var i = start; i < end; i++)
                     {
                         while (selectedPosList.Contains(posInt))
@@ -115,12 +123,14 @@ public class FaraBombAutoModeController : FaraBombGameModeBase
                         }
 
                         for (var j = 0; j < Config.BombLineCount; j++)
+                        {
                             bombCommandListModel.Add(new BombCommandModel
                             {
                                 BombId = BombId,
                                 SpawnDelayTime = BombLineDiffBeat * j,
-                                PositionIndex = posInt - j
+                                PositionIndex = posInt - 1
                             });
+                        }
                         FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                         selectedPosList.Add(posInt);
                     }
