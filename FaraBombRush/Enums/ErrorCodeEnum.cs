@@ -22,7 +22,7 @@ internal static class ErrorCodeEnumHelper
 {
     internal static int GetErrorCodeIndex(string errorCode)
     {
-        if (Enum.TryParse(errorCode, out ErrorCodeEnum errorCodeEnum)) return (int) errorCodeEnum;
+        if (Enum.TryParse(errorCode, out ErrorCodeEnum errorCodeEnum)) return (int)errorCodeEnum;
 
         throw new FaraBombException($"Unknown ErrorCode: {errorCode}");
     }

@@ -105,7 +105,7 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
 
     private void SearchStartAndEndPosition(int posInt, out int start, out int end)
     {
-        var e = (NotePositionEnum) (posInt - 1);
+        var e = (NotePositionEnum)(posInt - 1);
         if (e.IsTopPosition())
         {
             start = NotePositionEnum.TopLeft.GetPositionIndex();

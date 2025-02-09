@@ -43,7 +43,7 @@ internal class FaraBombScoreController : FaraBombComponentBaseController
     internal void BombThrough()
     {
         if (!Mathf.Approximately(FaraBombComboRate, MaxComboRate))
-            foreach (var item in _faraBombComboRatesByThroughCount.Select((value, index) => new {value, index}))
+            foreach (var item in _faraBombComboRatesByThroughCount.Select((value, index) => new { value, index }))
                 if (FaraBombThroughCount >= item.value)
                     FaraBombComboRate = Mathf.Pow(2, item.index);
                 else break;

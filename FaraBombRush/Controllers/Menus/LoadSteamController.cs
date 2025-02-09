@@ -15,7 +15,7 @@ internal class LoadSteamController : MonoBehaviour
     private static float _scoreSaberPP;
     private const int MaxRetryCount = 5;
     private const float RetryInterval = 3f;
-    
+
     internal static float ScoreSaberPP
     {
         get => _scoreSaberPP;
@@ -37,7 +37,7 @@ internal class LoadSteamController : MonoBehaviour
     {
         Plugin.Logger.Info("Start LoadSteamDataCoroutine");
         var retryCount = 0;
-        
+
         // Steam初期化を待つ
         while (!SteamManager.Initialized && retryCount < MaxRetryCount)
         {
@@ -45,7 +45,7 @@ internal class LoadSteamController : MonoBehaviour
             yield return new WaitForSeconds(RetryInterval);
             retryCount++;
         }
-        
+
         try
         {
             if (!SteamManager.Initialized)
@@ -69,6 +69,6 @@ internal class LoadSteamController : MonoBehaviour
             throw new FaraBombException(ex.Message, ErrorCodeEnum.LoadSteamError);
         }
     }
-    
+
     public static event EventHandler<float> OnChanged;
 }

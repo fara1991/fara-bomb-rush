@@ -11,7 +11,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 {
     private int _noteCutCount;
     private int _playerBombLevel;
-    
+
 
     private void Start()
     {
@@ -65,65 +65,65 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             case FaraBombCreatePatternEnum.BombSingle:
             case FaraBombCreatePatternEnum.BombDouble:
             case FaraBombCreatePatternEnum.BombTriple:
-            {
-                var start = 0;
-                var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
-                Plugin.Logger.Debug("Single");
-                for (var i = start; i < end; i++)
                 {
-                    // 1～10のPosition計算が必要
-                    while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
-
-                    bombCommandListModel.Add(new BombCommandModel
+                    var start = 0;
+                    var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
+                    Plugin.Logger.Debug("Single");
+                    for (var i = start; i < end; i++)
                     {
-                        BombId = BombId,
-                        SpawnDelayTime = 0,
-                        PositionIndex = posInt - 1
-                    });
-                    selectedPosList.Add(posInt);
-                }
+                        // 1～10のPosition計算が必要
+                        while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
 
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                break;
-            }
-            case FaraBombCreatePatternEnum.BombReset:
-            {
-                SearchStartAndEndPosition(posInt, out var start, out var end);
-                Plugin.Logger.Debug("Reset");
-                for (var i = start; i <= end; i++)
-                    bombCommandListModel.Add(new BombCommandModel
-                    {
-                        BombId = BombId,
-                        SpawnDelayTime = 0,
-                        PositionIndex = i
-                    });
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                break;
-            }
-            case FaraBombCreatePatternEnum.BombLineSingle:
-            case FaraBombCreatePatternEnum.BombLineDouble:
-            case FaraBombCreatePatternEnum.BombLineTriple:
-            {
-                var start = 0;
-                var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
-                Plugin.Logger.Debug("Double, Triple");
-                for (var i = start; i < end; i++)
-                {
-                    while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
-
-                    for (var j = 0; j < Config.BombLineCount; j++)
                         bombCommandListModel.Add(new BombCommandModel
                         {
                             BombId = BombId,
-                            SpawnDelayTime = BombLineDiffBeat * j,
+                            SpawnDelayTime = 0,
                             PositionIndex = posInt - 1
                         });
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    selectedPosList.Add(posInt);
-                }
+                        selectedPosList.Add(posInt);
+                    }
 
-                break;
-            }
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    break;
+                }
+            case FaraBombCreatePatternEnum.BombReset:
+                {
+                    SearchStartAndEndPosition(posInt, out var start, out var end);
+                    Plugin.Logger.Debug("Reset");
+                    for (var i = start; i <= end; i++)
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = 0,
+                            PositionIndex = i
+                        });
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    break;
+                }
+            case FaraBombCreatePatternEnum.BombLineSingle:
+            case FaraBombCreatePatternEnum.BombLineDouble:
+            case FaraBombCreatePatternEnum.BombLineTriple:
+                {
+                    var start = 0;
+                    var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
+                    Plugin.Logger.Debug("Double, Triple");
+                    for (var i = start; i < end; i++)
+                    {
+                        while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
+
+                        for (var j = 0; j < Config.BombLineCount; j++)
+                            bombCommandListModel.Add(new BombCommandModel
+                            {
+                                BombId = BombId,
+                                SpawnDelayTime = BombLineDiffBeat * j,
+                                PositionIndex = posInt - 1
+                            });
+                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                        selectedPosList.Add(posInt);
+                    }
+
+                    break;
+                }
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -131,7 +131,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
     private void SearchStartAndEndPosition(int posInt, out int start, out int end)
     {
-        var e = (NotePositionEnum) (posInt - 1);
+        var e = (NotePositionEnum)(posInt - 1);
         if (e.IsTopPosition())
         {
             start = NotePositionEnum.TopLeft.GetPositionIndex();

@@ -39,7 +39,7 @@ public static class NotePositionHelper
     public static Vector3 GetNotePosition(this NotePositionEnum position, float spawnDelayTime,
         float playerHeight = DefaultPlayerHeight)
     {
-        var pos = PositionCoordinates[(int) position];
+        var pos = PositionCoordinates[(int)position];
         Plugin.Logger.Debug($"Get note position: {pos}");
         pos.z += spawnDelayTime;
         return pos;
@@ -47,7 +47,7 @@ public static class NotePositionHelper
 
     public static int GetPositionIndex(this NotePositionEnum position)
     {
-        return (int) position;
+        return (int)position;
     }
 
     public static bool IsTopPosition(this NotePositionEnum position)
@@ -73,6 +73,6 @@ public static class NotePositionHelper
             throw new NotImplementedException();
         }
 
-        return (NotePositionEnum) index;
+        return (NotePositionEnum)index;
     }
 }

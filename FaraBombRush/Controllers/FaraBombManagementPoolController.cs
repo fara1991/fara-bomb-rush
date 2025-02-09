@@ -29,7 +29,7 @@ internal class FaraBombManagementPoolController
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
-        var noteLineEnum = (NotePositionEnum) commandModel.PositionIndex;
+        var noteLineEnum = (NotePositionEnum)commandModel.PositionIndex;
         return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
     }
 
