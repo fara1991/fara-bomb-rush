@@ -1,11 +1,12 @@
 ﻿using FaraBombRush.Enums;
-using FaraBombRush.Interfaces;
+using UnityEngine;
 
 namespace FaraBombRush.Controllers.Components;
 
-public class FaraBombEffectController : FaraBombComponentBase
+internal class FaraBombEffectController : FaraBombComponentBaseController
 {
     private const int EffectCounter = 120;
+    private AudioSource _audioSource;
     private int _counter;
     private FaraBombExplosionPhaseEnum _phase = FaraBombExplosionPhaseEnum.Idle;
 
@@ -17,14 +18,16 @@ public class FaraBombEffectController : FaraBombComponentBase
         if (_counter >= EffectCounter) Disable();
     }
 
-    public override void InitializeComponent()
+    protected override void InitializeComponent()
     {
         // エフェクトオブジェクトの表示/非表示制御
         gameObject.SetActive(false);
+        _audioSource = gameObject.GetComponentInChildren<AudioSource>();
+        _audioSource.volume = 0.5f;
         Plugin.Logger.Debug("Initializing EffectController");
     }
 
-    public override void Enable()
+    protected internal override void Enable()
     {
         gameObject.SetActive(true);
         _phase = FaraBombExplosionPhaseEnum.ExplosionNow;
@@ -33,7 +36,7 @@ public class FaraBombEffectController : FaraBombComponentBase
         Plugin.Logger.Debug("FaraBombEffectController enabled");
     }
 
-    public override void Disable()
+    protected internal override void Disable()
     {
         gameObject.SetActive(false);
         _phase = FaraBombExplosionPhaseEnum.Exploded;
@@ -41,7 +44,7 @@ public class FaraBombEffectController : FaraBombComponentBase
         Plugin.Logger.Debug("FaraBombEffectController disabled");
     }
 
-    public bool ExplosionCompleted()
+    internal bool ExplosionCompleted()
     {
         return _phase == FaraBombExplosionPhaseEnum.Exploded;
     }

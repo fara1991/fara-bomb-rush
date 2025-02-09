@@ -1,5 +1,5 @@
 ﻿using FaraBombRush.Configs;
-using FaraBombRush.Controllers;
+using FaraBombRush.Controllers.Menus;
 using Zenject;
 
 namespace FaraBombRush.Dependencies;
@@ -16,5 +16,6 @@ public class GameCustomInstaller : Installer
     public override void InstallBindings()
     {
         Container.BindInstance(_config).AsSingle();
+        Container.BindInterfacesAndSelfTo<LoadSteamController>().FromNewComponentOnNewGameObject().AsCached().NonLazy();
     }
 }

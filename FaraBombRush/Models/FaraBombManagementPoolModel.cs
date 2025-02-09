@@ -7,15 +7,15 @@ using Object = UnityEngine.Object;
 
 namespace FaraBombRush.Models;
 
-public class FaraBombManagementPoolModel
+internal class FaraBombManagementPoolModel
 {
     private const int InitialSize = 100;
     private readonly HashSet<FaraBombComponentModel> _activeItems;
+    private readonly PluginConfig _pluginConfig;
     private readonly Queue<FaraBombComponentModel> _pool;
     private readonly GameObject _rootPrefab;
-    private PluginConfig _pluginConfig;
 
-    public FaraBombManagementPoolModel(GameObject rootObject, PluginConfig pluginConfig)
+    internal FaraBombManagementPoolModel(GameObject rootObject, PluginConfig pluginConfig)
     {
         _pluginConfig = pluginConfig;
         _pool = new Queue<FaraBombComponentModel>();
@@ -26,8 +26,8 @@ public class FaraBombManagementPoolModel
         Plugin.Logger.Debug($"Pool initialized with {InitialSize} instances");
     }
 
-    public int ActiveCount => _activeItems.Count;
-    public int PoolCount => _pool.Count;
+    internal int ActiveCount => _activeItems.Count;
+    internal int PoolCount => _pool.Count;
 
     private void PrewarmPool()
     {
@@ -52,7 +52,7 @@ public class FaraBombManagementPoolModel
         _pool.Enqueue(components);
     }
 
-    public FaraBombComponentModel Spawn(Vector3 position)
+    internal FaraBombComponentModel Spawn(Vector3 position)
     {
         if (_pool.Count == 0)
         {
@@ -68,7 +68,7 @@ public class FaraBombManagementPoolModel
         return instance;
     }
 
-    public void Despawn(FaraBombComponentModel instance)
+    internal void Despawn(FaraBombComponentModel instance)
     {
         if (!_activeItems.Remove(instance))
         {
@@ -80,12 +80,12 @@ public class FaraBombManagementPoolModel
         instance.OnDespawned();
     }
 
-    public IReadOnlyCollection<FaraBombComponentModel> GetActiveItems()
+    internal IReadOnlyCollection<FaraBombComponentModel> GetActiveItems()
     {
         return _activeItems;
     }
 
-    public void Cleanup()
+    internal void Cleanup()
     {
         foreach (var item in _activeItems) item?.gameObject.SetActive(false);
         _activeItems.Clear();

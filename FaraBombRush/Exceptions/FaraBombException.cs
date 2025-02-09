@@ -1,28 +1,26 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using static FaraBombRush.Enums.ErrorCodeEnum;
+using FaraBombRush.Enums;
 
 namespace FaraBombRush.Exceptions;
 
 [Serializable]
-public class FaraBombException : Exception
+internal class FaraBombException : Exception
 {
-    private int ErrorCode { get; set; }
-
     // メッセージを受け取るコンストラクタ
-    public FaraBombException(string errorMessage) : base(errorMessage)
+    internal FaraBombException(string errorMessage) : base(errorMessage)
     {
         Plugin.Logger.Error(errorMessage);
     }
 
     // メッセージとエラーコードを受け取るコンストラクタ
-    public FaraBombException(string errorMessage, ErrorCode errorCode) : base(errorMessage)
+    internal FaraBombException(string errorMessage, ErrorCodeEnum errorCodeEnum) : base(errorMessage)
     {
-        Plugin.Logger.Error($"ErrorMessage: {errorMessage}, ErrorCode: {errorCode}");
+        Plugin.Logger.Error($"ErrorMessage: {errorMessage}, ErrorCode: {errorCodeEnum}");
     }
 
     // メッセージと内部例外を受け取るコンストラクタ
-    public FaraBombException(string errorMessage, Exception innerException) : base(errorMessage, innerException)
+    internal FaraBombException(string errorMessage, Exception innerException) : base(errorMessage, innerException)
     {
         Plugin.Logger.Error($"ErrorMessage: {errorMessage}, InnerException: {innerException.Message}");
     }

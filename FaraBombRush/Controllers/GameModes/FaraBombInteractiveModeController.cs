@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ChatCore;
 using ChatCore.Interfaces;
-using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
-using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers.GameModes;
 
-public class FaraBombInteractiveModeController : FaraBombGameModeBase
+internal class FaraBombInteractiveModeController : FaraBombGameModeBaseController
 {
     private const string BaseCommand = "!bomb";
     private const string LineCommand = "!bombline";
@@ -45,7 +42,7 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
         return pos >= 1 && NotePositionEnumList.Count >= pos;
     }
 
-    public void SendCommand(string command)
+    internal void SendCommand(string command)
     {
         _commands.Add(command);
     }
@@ -72,7 +69,6 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
         if (!int.TryParse(pos, out var posInt)) return;
 
         var bombCommandListModel = new List<BombCommandModel>();
-        Plugin.Logger.Debug(Config.ToString());
         if (chat.Contains(LineCommand))
         {
             for (var i = 0; i < Config.BombLineCount; i++)
@@ -109,28 +105,28 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
 
     private void SearchStartAndEndPosition(int posInt, out int start, out int end)
     {
-        var e = (NoteLineCustomEnum)(posInt - 1);
+        var e = (NotePositionEnum) (posInt - 1);
         if (e.IsTopPosition())
         {
-            start = TopLeft.GetPositionIndex();
-            end = TopRight.GetPositionIndex();
+            start = NotePositionEnum.TopLeft.GetPositionIndex();
+            end = NotePositionEnum.TopRight.GetPositionIndex();
         }
         else if (e.IsBottomPosition())
         {
-            start = BottomLeft.GetPositionIndex();
-            end = BottomRight.GetPositionIndex();
+            start = NotePositionEnum.BottomLeft.GetPositionIndex();
+            end = NotePositionEnum.BottomRight.GetPositionIndex();
         }
         else if (e.IsCenterPosition())
         {
-            start = CenterLeft.GetPositionIndex();
-            end = CenterRight.GetPositionIndex();
+            start = NotePositionEnum.CenterLeft.GetPositionIndex();
+            end = NotePositionEnum.CenterRight.GetPositionIndex();
         }
         else
         {
             // 万が一変な数値が来たらBottomのボムリセとして扱う
             Plugin.Logger.Debug($"Outbound value. pos: {posInt}.");
-            start = BottomLeft.GetPositionIndex();
-            end = BottomRight.GetPositionIndex();
+            start = NotePositionEnum.BottomLeft.GetPositionIndex();
+            end = NotePositionEnum.BottomRight.GetPositionIndex();
         }
     }
 }

@@ -1,27 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using FaraBombRush.Controllers.Components;
 using FaraBombRush.Enums;
-using FaraBombRush.Interfaces;
 using FaraBombRush.Models;
 using UnityEngine;
-using FaraBombRush.Controllers.Components;
-using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
-using UnityEngine.Serialization;
 
 namespace FaraBombRush.Controllers;
 
-public class FaraBombCoordinatorController : MonoBehaviour
+internal class FaraBombCoordinatorController : MonoBehaviour
 {
     // Components
-    private readonly List<IFaraBombComponent> _components = [];
+    private readonly List<FaraBombComponentBaseController> _components = [];
+    private FaraBombCalcScoreEnum _calcScoreParameter = FaraBombCalcScoreEnum.None;
     private FaraBombColliderController _colliderComponent;
+
+    private FaraBombStateEnum _currentStateEnum = FaraBombStateEnum.Idle;
     private FaraBombEffectController _effectComponent;
     private FaraBombMoveController _movementComponent;
 
-    private FaraBombStateEnum _currentStateEnum = FaraBombStateEnum.Idle;
-    private ScoreMode _calcScoreMode = ScoreMode.None;
-
-    public void Setup(
+    internal void Setup(
         FaraBombColliderController colliderComponent = null,
         FaraBombMoveController movementComponent = null,
         FaraBombEffectController effectComponent = null)
@@ -49,7 +46,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
         }
     }
 
-    public void InitializeWithCommand(BombCommandModel command)
+    internal void InitializeWithCommand(BombCommandModel command)
     {
         if (command is null) throw new ArgumentNullException(nameof(command));
 
@@ -59,7 +56,7 @@ public class FaraBombCoordinatorController : MonoBehaviour
         TransitionTo(FaraBombStateEnum.Move);
     }
 
-    public void UpdateState()
+    internal void UpdateState()
     {
         switch (_currentStateEnum)
         {
@@ -79,13 +76,13 @@ public class FaraBombCoordinatorController : MonoBehaviour
         if (_movementComponent is not null && _movementComponent.LimitPosition())
         {
             TransitionTo(FaraBombStateEnum.Idle);
-            _calcScoreMode = ScoreMode.AddScore;
+            _calcScoreParameter = FaraBombCalcScoreEnum.AddScore;
         }
         else if (_colliderComponent is not null)
         {
             if (!_colliderComponent.CollisionLeftSaber() && !_colliderComponent.CollisionRightSaber()) return;
             TransitionTo(FaraBombStateEnum.Explosion);
-            _calcScoreMode = ScoreMode.SubtractScore;
+            _calcScoreParameter = FaraBombCalcScoreEnum.SubtractScore;
         }
     }
 
@@ -94,16 +91,16 @@ public class FaraBombCoordinatorController : MonoBehaviour
         if (_effectComponent is not null && _effectComponent.ExplosionCompleted()) TransitionTo(FaraBombStateEnum.Idle);
     }
 
-    private void TransitionTo(FaraBombStateEnum newState)
+    private void TransitionTo(FaraBombStateEnum newStateEnum)
     {
-        _currentStateEnum = newState;
-        OnStateEnter(newState);
-        Plugin.Logger.Debug($"Enabling {newState.ToString()}");
+        _currentStateEnum = newStateEnum;
+        OnStateEnter(newStateEnum);
+        Plugin.Logger.Debug($"Enabling {newStateEnum.ToString()}");
     }
 
-    private void OnStateEnter(FaraBombStateEnum state)
+    private void OnStateEnter(FaraBombStateEnum stateEnum)
     {
-        switch (state)
+        switch (stateEnum)
         {
             case FaraBombStateEnum.Idle:
                 _movementComponent?.Disable();
@@ -123,15 +120,15 @@ public class FaraBombCoordinatorController : MonoBehaviour
         }
     }
 
-    public bool IsInvalid()
+    internal bool IsInvalid()
     {
         return _currentStateEnum == FaraBombStateEnum.Idle;
     }
 
-    public ScoreMode GetScoreMode()
+    internal FaraBombCalcScoreEnum GetScoreMode()
     {
-        var scoreMode = _calcScoreMode;
-        _calcScoreMode = ScoreMode.None;
+        var scoreMode = _calcScoreParameter;
+        _calcScoreParameter = FaraBombCalcScoreEnum.None;
         return scoreMode;
     }
 }

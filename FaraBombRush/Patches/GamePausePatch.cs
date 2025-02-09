@@ -1,18 +1,18 @@
-﻿using HarmonyLib;
-using static FaraBombRush.Enums.GamePauseStepEnum;
+﻿using FaraBombRush.Enums;
+using HarmonyLib;
 
 namespace FaraBombRush.Patches;
 
 [HarmonyPatch(typeof(GamePause))]
 internal class GamePausePatch
 {
-    internal static GamePauseStep GamePauseStep = GamePauseStep.Resume;
+    internal static GamePauseStepEnum GamePauseStepEnum = GamePauseStepEnum.Resume;
 
     [HarmonyPatch(nameof(GamePause.Pause))]
     [HarmonyPostfix]
     public static void AfterPause()
     {
-        GamePauseStep = GamePauseStep.Pause;
+        GamePauseStepEnum = GamePauseStepEnum.Pause;
         Plugin.Logger.Debug("GamePause.Pause called");
     }
 
@@ -20,7 +20,7 @@ internal class GamePausePatch
     [HarmonyPrefix]
     public static void WillResume()
     {
-        GamePauseStep = GamePauseStep.WillResume;
+        GamePauseStepEnum = GamePauseStepEnum.WillResume;
         Plugin.Logger.Debug("GamePause.WillResume called");
     }
 
@@ -28,7 +28,7 @@ internal class GamePausePatch
     [HarmonyPostfix]
     public static void AfterResume()
     {
-        GamePauseStep = GamePauseStep.Resume;
+        GamePauseStepEnum = GamePauseStepEnum.Resume;
         Plugin.Logger.Debug("GamePause.Resume called");
     }
 }

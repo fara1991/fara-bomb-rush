@@ -1,10 +1,9 @@
 ﻿using FaraBombRush.Enums;
-using FaraBombRush.Interfaces;
 using UnityEngine;
 
 namespace FaraBombRush.Controllers.Components;
 
-public class FaraBombColliderController : FaraBombComponentBase
+internal class FaraBombColliderController : FaraBombComponentBaseController
 {
     private string _collisionSaberName;
     private bool _isCollidedEnter;
@@ -35,7 +34,7 @@ public class FaraBombColliderController : FaraBombComponentBase
         _isCollidedEnter = true;
     }
 
-    public override void InitializeComponent()
+    protected override void InitializeComponent()
     {
         // コライダーはbombObjectについているものを使用
         _sphereCollider ??= transform.GetComponent<SphereCollider>();
@@ -65,23 +64,23 @@ public class FaraBombColliderController : FaraBombComponentBase
                collider.gameObject.name == SaberObjectEnum.RightSaber.ToString();
     }
 
-    public bool CollisionLeftSaber()
+    internal bool CollisionLeftSaber()
     {
         return _isCollidedEnter && _collisionSaberName == SaberObjectEnum.LeftSaber.ToString();
     }
 
-    public bool CollisionRightSaber()
+    internal bool CollisionRightSaber()
     {
         return _isCollidedEnter && _collisionSaberName == SaberObjectEnum.RightSaber.ToString();
     }
 
-    public override void Enable()
+    protected internal override void Enable()
     {
         base.Enable();
         gameObject.SetActive(true);
     }
 
-    public override void Disable()
+    protected internal override void Disable()
     {
         base.Disable();
         gameObject.SetActive(false);
