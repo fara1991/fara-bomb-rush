@@ -67,74 +67,74 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             case FaraBombCreatePatternEnum.BombSingle:
             case FaraBombCreatePatternEnum.BombDouble:
             case FaraBombCreatePatternEnum.BombTriple:
-            {
-                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
-                for (var i = startPos; i < endPos; i++)
                 {
-                    while (selectedPosList.Contains(notePositionEnum))
+                    endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
+                    for (var i = startPos; i < endPos; i++)
                     {
-                        notePositionEnum = 
-                            NotePositionEnumHelper.RandomPositionEnum();
-                    }
+                        while (selectedPosList.Contains(notePositionEnum))
+                        {
+                            notePositionEnum =
+                                NotePositionEnumHelper.RandomPositionEnum();
+                        }
 
-                    bombCommandListModel.Add(new BombCommandModel
-                    {
-                        BombId = BombId,
-                        SpawnDelayTime = 0,
-                        PositionIndex = notePositionEnum.GetValue()
-                    });
-                    selectedPosList.Add(notePositionEnum);
-                }
-
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                break;
-            }
-            case FaraBombCreatePatternEnum.BombReset:
-            {
-                if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
-                {
-                    startPos = NotePositionEnum.TopLeft.GetValue();
-                    endPos = NotePositionEnum.TopRight.GetValue();
-                }
-                else
-                {
-                    startPos = NotePositionEnum.BottomLeft.GetValue();
-                    endPos = NotePositionEnum.BottomRight.GetValue();
-                }
-
-                for (var i = startPos; i <= endPos; i++)
-                    bombCommandListModel.Add(new BombCommandModel
-                    {
-                        BombId = BombId,
-                        SpawnDelayTime = 0,
-                        PositionIndex = i
-                    });
-                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                break;
-            }
-            case FaraBombCreatePatternEnum.BombLineSingle:
-            case FaraBombCreatePatternEnum.BombLineDouble:
-            case FaraBombCreatePatternEnum.BombLineTriple:
-            {
-                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
-                for (var i = startPos; i < endPos; i++)
-                {
-                    while (selectedPosList.Contains(notePositionEnum))
-                        notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
-
-                    for (var j = 0; j < Config.BombLineCount; j++)
                         bombCommandListModel.Add(new BombCommandModel
                         {
                             BombId = BombId,
-                            SpawnDelayTime = BombLineDiffBeat * j,
+                            SpawnDelayTime = 0,
                             PositionIndex = notePositionEnum.GetValue()
                         });
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    selectedPosList.Add(notePositionEnum);
-                }
+                        selectedPosList.Add(notePositionEnum);
+                    }
 
-                break;
-            }
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    break;
+                }
+            case FaraBombCreatePatternEnum.BombReset:
+                {
+                    if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
+                    {
+                        startPos = NotePositionEnum.TopLeft.GetValue();
+                        endPos = NotePositionEnum.TopRight.GetValue();
+                    }
+                    else
+                    {
+                        startPos = NotePositionEnum.BottomLeft.GetValue();
+                        endPos = NotePositionEnum.BottomRight.GetValue();
+                    }
+
+                    for (var i = startPos; i <= endPos; i++)
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = 0,
+                            PositionIndex = i
+                        });
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    break;
+                }
+            case FaraBombCreatePatternEnum.BombLineSingle:
+            case FaraBombCreatePatternEnum.BombLineDouble:
+            case FaraBombCreatePatternEnum.BombLineTriple:
+                {
+                    endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
+                    for (var i = startPos; i < endPos; i++)
+                    {
+                        while (selectedPosList.Contains(notePositionEnum))
+                            notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
+
+                        for (var j = 0; j < Config.BombLineCount; j++)
+                            bombCommandListModel.Add(new BombCommandModel
+                            {
+                                BombId = BombId,
+                                SpawnDelayTime = BombLineDiffBeat * j,
+                                PositionIndex = notePositionEnum.GetValue()
+                            });
+                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                        selectedPosList.Add(notePositionEnum);
+                    }
+
+                    break;
+                }
             default:
                 throw new ArgumentOutOfRangeException();
         }
