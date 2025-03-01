@@ -23,7 +23,7 @@ internal class FaraBombManagementPoolModel
         _rootPrefab = rootObject;
 
         PrewarmPool();
-        Plugin.Logger.Debug($"Pool initialized with {InitialSize} instances");
+        Plugin.Logger.Info($"Pool initialized with {InitialSize} instances");
     }
 
     internal int ActiveCount => _activeItems.Count;
@@ -92,7 +92,5 @@ internal class FaraBombManagementPoolModel
 
         foreach (var item in _pool.Where(item => item is not null)) Object.Destroy(item.gameObject);
         _pool.Clear();
-
-        Plugin.Logger.Debug("Pool cleanup completed");
     }
 }

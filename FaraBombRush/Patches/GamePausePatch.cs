@@ -13,7 +13,7 @@ internal class GamePausePatch
     public static void AfterPause()
     {
         GamePauseStepEnum = GamePauseStepEnum.Pause;
-        Plugin.Logger.Debug("GamePause.Pause called");
+        Plugin.Logger.Info("GamePause.Pause called");
     }
 
     [HarmonyPatch(nameof(GamePause.WillResume))]
@@ -21,7 +21,7 @@ internal class GamePausePatch
     public static void WillResume()
     {
         GamePauseStepEnum = GamePauseStepEnum.WillResume;
-        Plugin.Logger.Debug("GamePause.WillResume called");
+        Plugin.Logger.Info("GamePause.WillResume called");
     }
 
     [HarmonyPatch(nameof(GamePause.Resume))]
@@ -29,6 +29,6 @@ internal class GamePausePatch
     public static void AfterResume()
     {
         GamePauseStepEnum = GamePauseStepEnum.Resume;
-        Plugin.Logger.Debug("GamePause.Resume called");
+        Plugin.Logger.Info("GamePause.Resume called");
     }
 }

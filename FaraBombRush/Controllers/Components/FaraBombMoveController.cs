@@ -14,7 +14,7 @@ internal class FaraBombMoveController : FaraBombComponentBaseController
 
     protected override void InitializeComponent()
     {
-        Plugin.Logger.Debug("Initializing BombController");
+        Plugin.Logger.Info("Initializing MoveController");
     }
 
     private void Move()

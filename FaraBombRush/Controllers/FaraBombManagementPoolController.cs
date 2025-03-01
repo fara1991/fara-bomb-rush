@@ -24,7 +24,6 @@ internal class FaraBombManagementPoolController
 
         _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
         _isInitialized = true;
-        Plugin.Logger.Debug("Pool initialized successfully");
     }
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
@@ -96,7 +95,6 @@ internal class FaraBombManagementPoolController
         {
             _poolModel.Cleanup();
             _isInitialized = false;
-            Plugin.Logger.Debug("Pool cleanup completed");
         }
         catch (Exception ex)
         {

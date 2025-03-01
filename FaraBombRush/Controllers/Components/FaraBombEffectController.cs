@@ -24,7 +24,7 @@ internal class FaraBombEffectController : FaraBombComponentBaseController
         gameObject.SetActive(false);
         _audioSource = gameObject.GetComponentInChildren<AudioSource>();
         _audioSource.volume = 0.5f;
-        Plugin.Logger.Debug("Initializing EffectController");
+        Plugin.Logger.Info("Initializing EffectController");
     }
 
     protected internal override void Enable()
@@ -33,7 +33,6 @@ internal class FaraBombEffectController : FaraBombComponentBaseController
         _phase = FaraBombExplosionPhaseEnum.ExplosionNow;
         _counter = 0;
         base.Enable();
-        Plugin.Logger.Debug("FaraBombEffectController enabled");
     }
 
     protected internal override void Disable()
@@ -41,7 +40,6 @@ internal class FaraBombEffectController : FaraBombComponentBaseController
         gameObject.SetActive(false);
         _phase = FaraBombExplosionPhaseEnum.Exploded;
         base.Disable();
-        Plugin.Logger.Debug("FaraBombEffectController disabled");
     }
 
     internal bool ExplosionCompleted()

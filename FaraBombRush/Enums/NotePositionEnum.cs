@@ -1,23 +1,24 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace FaraBombRush.Enums;
 
 public enum NotePositionEnum
 {
-    TopLeft,
-    TopMiddleLeft,
-    TopMiddleRight,
-    TopRight,
-    CenterLeft,
-    CenterRight,
-    BottomLeft,
-    BottomMiddleLeft,
-    BottomMiddleRight,
-    BottomRight
+    TopLeft = 0,
+    TopMiddleLeft = 1,
+    TopMiddleRight = 2,
+    TopRight = 3,
+    CenterLeft = 4,
+    CenterRight = 7,
+    BottomLeft = 8,
+    BottomMiddleLeft = 9,
+    BottomMiddleRight = 10,
+    BottomRight = 11
 }
 
-public static class NotePositionHelper
+public static class NotePositionEnumHelper
 {
     private const float SpawnZ = 30.0f;
     private const float DefaultPlayerHeight = 140f;
@@ -36,18 +37,26 @@ public static class NotePositionHelper
         new(0.9f, 0.7f, SpawnZ) // BottomRight
     ];
 
+    public static int GetValue(this NotePositionEnum notePosition) => (int)notePosition;
+
+    public static int GetIndex(this NotePositionEnum notePosition)
+    {
+        var values = Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+        return values.IndexOf(notePosition);
+    }
+
+    public static NotePositionEnum RandomPositionEnum()
+    {
+        var values = Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+        return values[UnityEngine.Random.Range(0, values.Count)];
+    }
+
     public static Vector3 GetNotePosition(this NotePositionEnum position, float spawnDelayTime,
         float playerHeight = DefaultPlayerHeight)
     {
-        var pos = PositionCoordinates[(int)position];
-        Plugin.Logger.Debug($"Get note position: {pos}");
+        var pos = PositionCoordinates[position.GetIndex()];
         pos.z += spawnDelayTime;
         return pos;
-    }
-
-    public static int GetPositionIndex(this NotePositionEnum position)
-    {
-        return (int)position;
     }
 
     public static bool IsTopPosition(this NotePositionEnum position)
@@ -65,14 +74,15 @@ public static class NotePositionHelper
         return position.ToString().Contains("Bottom");
     }
 
-    public static NotePositionEnum ToNotePosition(int index)
+    public static NotePositionEnum FromValue(int value)
     {
-        if (!Enum.IsDefined(typeof(NotePositionEnum), index))
+        var values = Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+        foreach (var notePositionValue in values.Where(notePositionValue => value == notePositionValue.GetValue() + 1))
         {
-            Plugin.Logger.Debug("Enum Outbound index");
-            throw new NotImplementedException();
+            return notePositionValue;
         }
 
-        return (NotePositionEnum)index;
+        // 一致しないIndexはランダムに再計算
+        return RandomPositionEnum();
     }
 }

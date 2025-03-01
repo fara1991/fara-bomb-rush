@@ -95,7 +95,6 @@ internal class FaraBombCoordinatorController : MonoBehaviour
     {
         _currentStateEnum = newStateEnum;
         OnStateEnter(newStateEnum);
-        Plugin.Logger.Debug($"Enabling {newStateEnum.ToString()}");
     }
 
     private void OnStateEnter(FaraBombStateEnum stateEnum)

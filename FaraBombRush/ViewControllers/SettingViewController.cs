@@ -78,7 +78,7 @@ internal class SettingViewController : BSMLResourceViewController
 
     private void HandleChanged(object sender, float pp)
     {
-        Plugin.Logger.Debug($"Get Player PP: {pp}");
+        Plugin.Logger.Info($"Get Player PP: {pp}");
         _playerPP = pp;
         _playerLevelEnum = FaraBombLevelEnumHelper.GetLevelEnum(pp);
     }

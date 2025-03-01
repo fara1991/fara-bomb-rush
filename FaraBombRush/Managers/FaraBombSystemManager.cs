@@ -114,7 +114,7 @@ internal class FaraBombSystemManager : MonoBehaviour
             _faraBombManagementPrefab.SetActive(false);
 
             Destroy(prefab);
-            Plugin.Logger.Debug("FaraBomb prefab initialized successfully");
+            Plugin.Logger.Info("FaraBomb prefab initialized successfully");
         }
         catch (Exception ex)
         {
@@ -126,14 +126,14 @@ internal class FaraBombSystemManager : MonoBehaviour
     {
         _scoreController = gameObject.AddComponent<FaraBombScoreController>();
         _scoreController.Enable();
-        Plugin.Logger.Debug("ScoreSystem initialized successfully");
+        Plugin.Logger.Info("ScoreSystem initialized successfully");
     }
 
     private void InitializePool()
     {
         _poolController = new FaraBombManagementPoolController();
         _poolController.Initialize(_faraBombManagementPrefab, _config);
-        Plugin.Logger.Debug("Pool initialized successfully");
+        Plugin.Logger.Info("Pool initialized successfully");
     }
 
     private void ProcessCommandQueue()

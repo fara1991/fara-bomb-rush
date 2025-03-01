@@ -23,13 +23,12 @@ internal class LoadSteamController : MonoBehaviour
         {
             _scoreSaberPP = value;
             OnChanged?.Invoke(null, value); // イベント発火
-            Plugin.Logger.Debug($"ScoreSaber PP: {value}");
+            Plugin.Logger.Info($"ScoreSaber PP: {value}");
         }
     }
 
     private void Start()
     {
-        Plugin.Logger.Info("Loading Steam");
         StartCoroutine(LoadSteamDataCoroutine());
     }
 
@@ -41,7 +40,7 @@ internal class LoadSteamController : MonoBehaviour
         // Steam初期化を待つ
         while (!SteamManager.Initialized && retryCount < MaxRetryCount)
         {
-            Plugin.Logger.Debug($"Waiting for Steam initialization... Attempt {retryCount + 1}");
+            Plugin.Logger.Info($"Waiting for Steam initialization... Attempt {retryCount + 1}");
             yield return new WaitForSeconds(RetryInterval);
             retryCount++;
         }
@@ -54,7 +53,6 @@ internal class LoadSteamController : MonoBehaviour
             }
 
             var steamUserId = SteamUser.GetSteamID().m_SteamID.ToString();
-            Plugin.Logger.Debug($"SteamUserId: {steamUserId}");
             var scoreSaberUrl = $"https://scoresaber.com/api/player/{steamUserId}/basic";
 
             using var httpClient = new HttpClient();

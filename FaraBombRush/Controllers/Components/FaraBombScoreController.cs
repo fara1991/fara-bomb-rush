@@ -25,7 +25,7 @@ internal class FaraBombScoreController : FaraBombComponentBaseController
         FaraBombCutCount = 0;
         FaraBombThroughCount = 0;
         FaraBombComboRate = 1f;
-        Plugin.Logger.Debug("Initializing ScoreController");
+        Plugin.Logger.Info("Initializing ScoreController");
     }
 
     // ぶつかった時の処理
@@ -35,8 +35,6 @@ internal class FaraBombScoreController : FaraBombComponentBaseController
         FaraBombThroughComboCount = 0;
         FaraBombComboRate = 1f;
         FaraBombScore -= BaseFaraBombCutPenalty * FaraBombCutCount;
-        Plugin.Logger.Debug(
-            $"Bomb hit! Score: {FaraBombScore}, Cuts: {FaraBombCutCount}");
     }
 
     // すり抜けた時の処理
@@ -51,7 +49,5 @@ internal class FaraBombScoreController : FaraBombComponentBaseController
         FaraBombThroughCount++;
         FaraBombThroughComboCount++;
         FaraBombScore += BaseAvoidBonus * FaraBombComboRate;
-        Plugin.Logger.Debug(
-            $"Bomb avoided! Score: {FaraBombScore}, Avoids: {FaraBombThroughCount}, ComboRate: {FaraBombComboRate}");
     }
 }

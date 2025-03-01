@@ -56,103 +56,87 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             }
         }
 
-        var posInt = Random.Range(1, NotePositionEnumList.Count);
-        var selectedPosList = new List<int>();
+        var notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
+        var selectedPosList = new List<NotePositionEnum>();
 
+        var startPos = 0;
+        int endPos;
         var bombCommandListModel = new List<BombCommandModel>();
         switch (pattern)
         {
             case FaraBombCreatePatternEnum.BombSingle:
             case FaraBombCreatePatternEnum.BombDouble:
             case FaraBombCreatePatternEnum.BombTriple:
+            {
+                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
+                for (var i = startPos; i < endPos; i++)
                 {
-                    var start = 0;
-                    var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
-                    Plugin.Logger.Debug("Single");
-                    for (var i = start; i < end; i++)
+                    while (selectedPosList.Contains(notePositionEnum))
                     {
-                        // 1～10のPosition計算が必要
-                        while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
-
-                        bombCommandListModel.Add(new BombCommandModel
-                        {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = posInt - 1
-                        });
-                        selectedPosList.Add(posInt);
+                        notePositionEnum = 
+                            NotePositionEnumHelper.RandomPositionEnum();
                     }
 
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    break;
+                    bombCommandListModel.Add(new BombCommandModel
+                    {
+                        BombId = BombId,
+                        SpawnDelayTime = 0,
+                        PositionIndex = notePositionEnum.GetValue()
+                    });
+                    selectedPosList.Add(notePositionEnum);
                 }
+
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                break;
+            }
             case FaraBombCreatePatternEnum.BombReset:
+            {
+                if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
                 {
-                    SearchStartAndEndPosition(posInt, out var start, out var end);
-                    Plugin.Logger.Debug("Reset");
-                    for (var i = start; i <= end; i++)
-                        bombCommandListModel.Add(new BombCommandModel
-                        {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = i
-                        });
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    break;
+                    startPos = NotePositionEnum.TopLeft.GetValue();
+                    endPos = NotePositionEnum.TopRight.GetValue();
                 }
+                else
+                {
+                    startPos = NotePositionEnum.BottomLeft.GetValue();
+                    endPos = NotePositionEnum.BottomRight.GetValue();
+                }
+
+                for (var i = startPos; i <= endPos; i++)
+                    bombCommandListModel.Add(new BombCommandModel
+                    {
+                        BombId = BombId,
+                        SpawnDelayTime = 0,
+                        PositionIndex = i
+                    });
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                break;
+            }
             case FaraBombCreatePatternEnum.BombLineSingle:
             case FaraBombCreatePatternEnum.BombLineDouble:
             case FaraBombCreatePatternEnum.BombLineTriple:
+            {
+                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
+                for (var i = startPos; i < endPos; i++)
                 {
-                    var start = 0;
-                    var end = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
-                    Plugin.Logger.Debug("Double, Triple");
-                    for (var i = start; i < end; i++)
-                    {
-                        while (selectedPosList.Contains(posInt)) posInt = Random.Range(1, NotePositionEnumList.Count);
+                    while (selectedPosList.Contains(notePositionEnum))
+                        notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
 
-                        for (var j = 0; j < Config.BombLineCount; j++)
-                            bombCommandListModel.Add(new BombCommandModel
-                            {
-                                BombId = BombId,
-                                SpawnDelayTime = BombLineDiffBeat * j,
-                                PositionIndex = posInt - 1
-                            });
-                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                        selectedPosList.Add(posInt);
-                    }
-
-                    break;
+                    for (var j = 0; j < Config.BombLineCount; j++)
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = BombLineDiffBeat * j,
+                            PositionIndex = notePositionEnum.GetValue()
+                        });
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    selectedPosList.Add(notePositionEnum);
                 }
+
+                break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
-        }
-    }
-
-    private void SearchStartAndEndPosition(int posInt, out int start, out int end)
-    {
-        var e = (NotePositionEnum)(posInt - 1);
-        if (e.IsTopPosition())
-        {
-            start = NotePositionEnum.TopLeft.GetPositionIndex();
-            end = NotePositionEnum.TopRight.GetPositionIndex();
-        }
-        else if (e.IsBottomPosition())
-        {
-            start = NotePositionEnum.BottomLeft.GetPositionIndex();
-            end = NotePositionEnum.BottomRight.GetPositionIndex();
-        }
-        else if (e.IsCenterPosition())
-        {
-            start = NotePositionEnum.CenterLeft.GetPositionIndex();
-            end = NotePositionEnum.CenterRight.GetPositionIndex();
-        }
-        else
-        {
-            // 万が一変な数値が来たらBottomのボムリセとして扱う
-            Plugin.Logger.Debug($"Outbound value. pos: {posInt}.");
-            start = NotePositionEnum.BottomLeft.GetPositionIndex();
-            end = NotePositionEnum.BottomRight.GetPositionIndex();
         }
     }
 }
