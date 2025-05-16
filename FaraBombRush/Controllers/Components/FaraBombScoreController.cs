@@ -25,7 +25,6 @@ internal class FaraBombScoreController : FaraBombComponentBaseController
         FaraBombCutCount = 0;
         FaraBombThroughCount = 0;
         FaraBombComboRate = 1f;
-        Plugin.Logger.Info("Initializing ScoreController");
     }
 
     // ぶつかった時の処理

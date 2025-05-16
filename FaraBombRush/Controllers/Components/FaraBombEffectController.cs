@@ -24,7 +24,6 @@ internal class FaraBombEffectController : FaraBombComponentBaseController
         gameObject.SetActive(false);
         _audioSource = gameObject.GetComponentInChildren<AudioSource>();
         _audioSource.volume = 0.5f;
-        Plugin.Logger.Info("Initializing EffectController");
     }
 
     protected internal override void Enable()

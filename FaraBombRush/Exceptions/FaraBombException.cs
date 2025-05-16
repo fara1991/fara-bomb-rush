@@ -10,19 +10,19 @@ internal class FaraBombException : Exception
     // メッセージを受け取るコンストラクタ
     internal FaraBombException(string errorMessage) : base(errorMessage)
     {
-        Plugin.Logger.Error(errorMessage);
+        Plugin.Logger.Critical(errorMessage);
     }
 
     // メッセージとエラーコードを受け取るコンストラクタ
     internal FaraBombException(string errorMessage, ErrorCodeEnum errorCodeEnum) : base(errorMessage)
     {
-        Plugin.Logger.Error($"ErrorMessage: {errorMessage}, ErrorCode: {errorCodeEnum}");
+        Plugin.Logger.Critical($"ErrorMessage: {errorMessage}, ErrorCode: {errorCodeEnum}");
     }
 
     // メッセージと内部例外を受け取るコンストラクタ
     internal FaraBombException(string errorMessage, Exception innerException) : base(errorMessage, innerException)
     {
-        Plugin.Logger.Error($"ErrorMessage: {errorMessage}, InnerException: {innerException.Message}");
+        Plugin.Logger.Critical($"ErrorMessage: {errorMessage}, InnerException: {innerException.Message}");
     }
 
     // 逆シリアル化コンストラクタ。このクラスの逆シリアル化のために必須。

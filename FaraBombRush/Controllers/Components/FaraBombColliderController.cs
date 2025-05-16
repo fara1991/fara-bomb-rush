@@ -23,8 +23,6 @@ internal class FaraBombColliderController : FaraBombComponentBaseController
     {
         if (_isCollidedEnter || !IsSaberCollider(other)) return;
 
-        Plugin.Logger.Info($"Saber collision detected: {other.gameObject.name}");
-
         _collisionSaberName = other.gameObject.name;
         _isCollidedEnter = true;
     }
@@ -34,7 +32,6 @@ internal class FaraBombColliderController : FaraBombComponentBaseController
         // コライダーはbombObjectについているものを使用
         _sphereCollider ??= transform.GetComponent<SphereCollider>();
         EnableCollider();
-        Plugin.Logger.Info("Initializing ColliderController");
     }
 
     private void EnableCollider()

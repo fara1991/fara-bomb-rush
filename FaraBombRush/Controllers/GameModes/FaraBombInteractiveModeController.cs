@@ -5,6 +5,8 @@ using System.Linq;
 using CatCore;
 using CatCore.Models.Twitch.IRC;
 using CatCore.Services.Twitch.Interfaces;
+using ChatCore;
+using ChatCore.Interfaces;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
@@ -22,9 +24,9 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
     private void Start()
     {
         var catCoreInstance = CatCoreInstance.Create();
-        // var chatCoreInstance = ChatCoreInstance.Create();
+        var chatCoreInstance = ChatCoreInstance.Create();
         catCoreInstance.RunAllServices().GetTwitchPlatformService().OnTextMessageReceived += CatCoreOnTextMessageReceived;
-        // chatCoreInstance.RunAllServices().GetTwitchService().OnTextMessageReceived += ChatCoreOnTextMessageReceived;
+        chatCoreInstance.RunAllServices().GetTwitchService().OnTextMessageReceived += ChatCoreOnTextMessageReceived;
     }
 
     private void Update()
@@ -37,10 +39,10 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         if (service.DefaultChannel.Name != "" && CheckCommand(message.Message)) _commands.Add(message.Message);
     }
 
-    // private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
-    // {
-    // if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Add(message.Message);
-    // }
+    private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
+    {
+    if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Add(message.Message);
+    }
 
     private bool CheckCommand(string chat)
     {

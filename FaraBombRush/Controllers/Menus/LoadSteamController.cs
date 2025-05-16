@@ -12,20 +12,10 @@ namespace FaraBombRush.Controllers.Menus;
 
 internal class LoadSteamController : MonoBehaviour
 {
-    private static float _scoreSaberPP;
     private const int MaxRetryCount = 5;
     private const float RetryInterval = 3f;
 
-    internal static float ScoreSaberPP
-    {
-        get => _scoreSaberPP;
-        set
-        {
-            _scoreSaberPP = value;
-            OnChanged?.Invoke(null, value); // イベント発火
-            Plugin.Logger.Info($"ScoreSaber PP: {value}");
-        }
-    }
+    internal static float ScoreSaberPP { get; private set; }
 
     private void Start()
     {
@@ -34,7 +24,6 @@ internal class LoadSteamController : MonoBehaviour
 
     private IEnumerator LoadSteamDataCoroutine()
     {
-        Plugin.Logger.Info("Start LoadSteamDataCoroutine");
         var retryCount = 0;
 
         // Steam初期化を待つ
@@ -67,6 +56,4 @@ internal class LoadSteamController : MonoBehaviour
             throw new FaraBombException(ex.Message, ErrorCodeEnum.LoadSteamError);
         }
     }
-
-    public static event EventHandler<float> OnChanged;
 }
