@@ -12,6 +12,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
     private int _noteCutCount;
     private int _playerBombLevel;
 
+    private const int AutoPushCoolCount = 150;
 
     private void Start()
     {
@@ -25,13 +26,13 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
     protected override void BombPush()
     {
-        if (_noteCutCount < 180)
+        if (_noteCutCount < AutoPushCoolCount)
         {
             _noteCutCount++;
         }
         else
         {
-            _noteCutCount -= 180;
+            _noteCutCount -= AutoPushCoolCount;
             CalcBombPattern();
         }
     }
@@ -67,74 +68,74 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             case FaraBombCreatePatternEnum.BombSingle:
             case FaraBombCreatePatternEnum.BombDouble:
             case FaraBombCreatePatternEnum.BombTriple:
+            {
+                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
+                for (var i = startPos; i < endPos; i++)
                 {
-                    endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) + 1;
-                    for (var i = startPos; i < endPos; i++)
+                    while (selectedPosList.Contains(notePositionEnum))
                     {
-                        while (selectedPosList.Contains(notePositionEnum))
-                        {
-                            notePositionEnum =
-                                NotePositionEnumHelper.RandomPositionEnum();
-                        }
-
-                        bombCommandListModel.Add(new BombCommandModel
-                        {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = notePositionEnum.GetValue()
-                        });
-                        selectedPosList.Add(notePositionEnum);
+                        notePositionEnum =
+                            NotePositionEnumHelper.RandomPositionEnum();
                     }
 
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    break;
+                    bombCommandListModel.Add(new BombCommandModel
+                    {
+                        BombId = BombId,
+                        SpawnDelayTime = 0,
+                        PositionIndex = notePositionEnum.GetValue()
+                    });
+                    selectedPosList.Add(notePositionEnum);
                 }
+
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                break;
+            }
             case FaraBombCreatePatternEnum.BombReset:
+            {
+                if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
                 {
-                    if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
-                    {
-                        startPos = NotePositionEnum.TopLeft.GetValue();
-                        endPos = NotePositionEnum.TopRight.GetValue();
-                    }
-                    else
-                    {
-                        startPos = NotePositionEnum.BottomLeft.GetValue();
-                        endPos = NotePositionEnum.BottomRight.GetValue();
-                    }
-
-                    for (var i = startPos; i <= endPos; i++)
-                        bombCommandListModel.Add(new BombCommandModel
-                        {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = i
-                        });
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                    break;
+                    startPos = NotePositionEnum.TopLeft.GetValue();
+                    endPos = NotePositionEnum.TopRight.GetValue();
                 }
+                else
+                {
+                    startPos = NotePositionEnum.BottomLeft.GetValue();
+                    endPos = NotePositionEnum.BottomRight.GetValue();
+                }
+
+                for (var i = startPos; i <= endPos; i++)
+                    bombCommandListModel.Add(new BombCommandModel
+                    {
+                        BombId = BombId,
+                        SpawnDelayTime = 0,
+                        PositionIndex = i
+                    });
+                FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                break;
+            }
             case FaraBombCreatePatternEnum.BombLineSingle:
             case FaraBombCreatePatternEnum.BombLineDouble:
             case FaraBombCreatePatternEnum.BombLineTriple:
+            {
+                endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
+                for (var i = startPos; i < endPos; i++)
                 {
-                    endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
-                    for (var i = startPos; i < endPos; i++)
-                    {
-                        while (selectedPosList.Contains(notePositionEnum))
-                            notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
+                    while (selectedPosList.Contains(notePositionEnum))
+                        notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
 
-                        for (var j = 0; j < Config.BombLineCount; j++)
-                            bombCommandListModel.Add(new BombCommandModel
-                            {
-                                BombId = BombId,
-                                SpawnDelayTime = BombLineDiffBeat * j,
-                                PositionIndex = notePositionEnum.GetValue()
-                            });
-                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-                        selectedPosList.Add(notePositionEnum);
-                    }
-
-                    break;
+                    for (var j = 0; j < Config.BombLineCount; j++)
+                        bombCommandListModel.Add(new BombCommandModel
+                        {
+                            BombId = BombId,
+                            SpawnDelayTime = BombLineDiffBeat * j,
+                            PositionIndex = notePositionEnum.GetValue()
+                        });
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    selectedPosList.Add(notePositionEnum);
                 }
+
+                break;
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }

@@ -195,12 +195,12 @@ internal class FaraBombSystemManager : MonoBehaviour
         using var writer = new StreamWriter(_faraBombScorePath, false);
         writer.WriteLine(
             $"""
-             FaraBombRush Debug
-             Score: {score}
+             Debug
+             Score: {score.ToString()}
              ComboRate: {comboRate}
              ThroughCount: {throughCount}
              ThroughComboCount: {throughComboCount}
-             Level: {FaraBombLevelEnumHelper.GetLevelEnum(LoadSteamController.ScoreSaberPP).ToString()}
+             Level: {FaraBombLevelEnumHelper.GetLevelEnum().ToString()}
              """
         );
     }
