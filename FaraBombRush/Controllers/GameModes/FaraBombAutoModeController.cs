@@ -125,7 +125,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
                         for (var j = 0; j < Config.BombLineCount; j++)
                         {
-                            
+
                             bombCommandListModel.Add(new BombCommandModel
                             {
                                 BombId = BombId,

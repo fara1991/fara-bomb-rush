@@ -41,7 +41,7 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
 
     private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
     {
-    if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Add(message.Message);
+        if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Add(message.Message);
     }
 
     private bool CheckCommand(string chat)
