@@ -4,7 +4,7 @@ namespace FaraBombRush.Controllers.Components;
 
 internal class FaraBombMoveController : FaraBombComponentBaseController
 {
-    private const float DefaultNoteJumpSpeed = 24.0f;
+    private const float DefaultNoteJumpSpeed = 20.0f;
     private const float BombDeletePositionZ = -3f;
 
     private void Update()

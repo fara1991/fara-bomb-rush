@@ -46,6 +46,7 @@
         <Compile Include="Controllers\Components\FaraBombMoveController.cs"/>
         <Compile Include="Controllers\Components\FaraBombScoreController.cs"/>
         <Compile Include="Controllers\Components\FaraBombComponentBaseController.cs"/>
+        <Compile Include="Controllers\Components\FaraStandardShaderController.cs" />
         <Compile Include="Controllers\FaraBombCoordinatorController.cs"/>
         <Compile Include="Controllers\FaraBombManagementPoolController.cs"/>
         <Compile Include="Controllers\GameModes\FaraBombAutoModeController.cs"/>
@@ -194,6 +195,10 @@
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Views\SettingView.bsml"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="Managers\Asset.log" />
+      <Content Include="Managers\test.log" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>

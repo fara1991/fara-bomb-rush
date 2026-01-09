@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers.GameModes;
 
 internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 {
-    private int _noteCutCount;
     private int _playerBombLevel;
 
-    private const int AutoPushCoolCount = 150;
+    private float _timer;
+    private const float Interval = 1.0f;
 
     private void Start()
     {
@@ -26,13 +27,13 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
     protected override void BombPush()
     {
-        if (_noteCutCount < AutoPushCoolCount)
+        if (_timer < Interval)
         {
-            _noteCutCount++;
+            _timer += Time.deltaTime;
         }
         else
         {
-            _noteCutCount -= AutoPushCoolCount;
+            _timer = 0f;
             CalcBombPattern();
         }
     }

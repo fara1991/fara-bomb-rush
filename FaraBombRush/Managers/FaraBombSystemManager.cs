@@ -21,7 +21,6 @@ internal class FaraBombSystemManager : MonoBehaviour
     private const string FaraBombAssetName = "FaraBomb";
     private const int MaxOnceAddBomb = 3;
     private const int WaitAddBombFrame = 30;
-    private static readonly int ShaderColor = Shader.PropertyToID("_Color");
 
     private readonly string _faraBombAssetPath =
         Path.Combine(Environment.CurrentDirectory, "UserData", "FaraBombRush", "farabomb.particle");
@@ -86,34 +85,12 @@ internal class FaraBombSystemManager : MonoBehaviour
         {
             _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
-
-            // レンダラーの状態を確認
-            var renderers = prefab.GetComponentsInChildren<Renderer>(true);
-            foreach (var renderer in renderers)
-            {
-                if (renderer.gameObject.name != "FaraBombObject") continue;
-
-                var material = renderer.sharedMaterial;
-                if (material is null) continue;
-
-                var newMaterial = new Material(material)
-                {
-                    // FaraBombObject用の設定
-                    // シェーダーと基本的な設定のみ変更
-                    shader = Shader.Find("Standard")
-                };
-
-                // 紫以外ありえない
-                if (newMaterial.HasProperty(ShaderColor))
-                    newMaterial.SetColor(ShaderColor, new Color(192f / 255f, 64f / 255f, 255f / 255f));
-
-                renderer.material = newMaterial;
-            }
-
+            
             _faraBombManagementPrefab = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             _faraBombManagementPrefab.SetActive(false);
 
             Destroy(prefab);
+            // _assetBundle.Unload(false);
             Plugin.Logger.Info("FaraBomb prefab initialized successfully");
         }
         catch (Exception ex)
