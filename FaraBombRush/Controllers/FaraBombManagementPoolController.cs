@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Enums;
-using static FaraBombRush.Enums.ErrorCodeEnum;
-using static FaraBombRush.Enums.GamePauseStepEnum;
 using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
 using UnityEngine;
 
 namespace FaraBombRush.Controllers;
 
-public class FaraBombManagementPoolController
+internal class FaraBombManagementPoolController
 {
     private bool _isInitialized;
     private FaraBombManagementPoolModel _poolModel;
 
-    public void Initialize(GameObject rootObject, PluginConfig pluginConfig)
+    internal void Initialize(GameObject rootObject, PluginConfig pluginConfig)
     {
         if (_isInitialized)
         {
@@ -26,12 +24,11 @@ public class FaraBombManagementPoolController
 
         _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
         _isInitialized = true;
-        Plugin.Logger.Debug("Pool initialized successfully");
     }
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
-        var noteLineEnum = (NoteLineCustomEnum)commandModel.PositionIndex;
+        var noteLineEnum = (NotePositionEnum)commandModel.PositionIndex;
         return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
     }
 
@@ -43,11 +40,11 @@ public class FaraBombManagementPoolController
         }
         catch (Exception ex)
         {
-            throw new FaraBombException(ex.Message, ErrorCode.InitializeInstanceError);
+            throw new FaraBombException(ex.Message, ErrorCodeEnum.InitializeInstanceError);
         }
     }
 
-    public void Spawn(BombCommandModel commandModel)
+    internal void Spawn(BombCommandModel commandModel)
     {
         try
         {
@@ -57,11 +54,11 @@ public class FaraBombManagementPoolController
         }
         catch (Exception ex)
         {
-            throw new FaraBombException(ex.Message, ErrorCode.SpawnError);
+            throw new FaraBombException(ex.Message, ErrorCodeEnum.SpawnError);
         }
     }
 
-    public void Despawn(FaraBombComponentModel instance)
+    internal void Despawn(FaraBombComponentModel instance)
     {
         if (!_isInitialized)
         {
@@ -75,11 +72,11 @@ public class FaraBombManagementPoolController
         }
         catch (Exception ex)
         {
-            throw new FaraBombException(ex.Message, ErrorCode.DespawnError);
+            throw new FaraBombException(ex.Message, ErrorCodeEnum.DespawnError);
         }
     }
 
-    public List<FaraBombComponentModel> GetActiveItems()
+    internal List<FaraBombComponentModel> GetActiveItems()
     {
         if (!_isInitialized)
         {
@@ -90,7 +87,7 @@ public class FaraBombManagementPoolController
         return _poolModel.GetActiveItems().ToList();
     }
 
-    public void Cleanup()
+    internal void Cleanup()
     {
         if (!_isInitialized) return;
 
@@ -98,19 +95,15 @@ public class FaraBombManagementPoolController
         {
             _poolModel.Cleanup();
             _isInitialized = false;
-            Plugin.Logger.Debug("Pool cleanup completed");
         }
         catch (Exception ex)
         {
-            throw new FaraBombException(ex.Message, ErrorCode.CleanupError);
+            throw new FaraBombException(ex.Message, ErrorCodeEnum.CleanupError);
         }
     }
 
-    public void SetPause(GamePauseStep pauseStep)
+    internal void SetPause(GamePauseStepEnum gamePauseStepEnum)
     {
-        foreach (var item in GetActiveItems())
-        {
-            item.SetPause(pauseStep);
-        }
+        foreach (var item in GetActiveItems()) item.SetPause(gamePauseStepEnum);
     }
 }

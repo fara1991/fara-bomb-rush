@@ -1,47 +1,54 @@
 ﻿using FaraBombRush.Enums;
-using FaraBombRush.Interfaces;
+using UnityEngine;
 
 namespace FaraBombRush.Controllers.Components;
 
-public class FaraBombEffectController : FaraBombComponentBase
+internal class FaraBombEffectController : FaraBombComponentBaseController
 {
-    private const int EffectCounter = 120;
-    private int _counter;
+    private AudioSource _audioSource;
+    private float _timer;
+    private const float Interval = 120.0f;
     private FaraBombExplosionPhaseEnum _phase = FaraBombExplosionPhaseEnum.Idle;
 
     private void Update()
     {
         if (_phase != FaraBombExplosionPhaseEnum.ExplosionNow) return;
 
-        _counter++;
-        if (_counter >= EffectCounter) Disable();
+        if (_timer < Interval)
+        {
+            _timer += Time.deltaTime;
+        }
+        else
+        {
+            _timer = 0;
+            Disable();
+        }
     }
 
-    public override void InitializeComponent()
+    protected override void InitializeComponent()
     {
         // エフェクトオブジェクトの表示/非表示制御
         gameObject.SetActive(false);
-        Plugin.Logger.Debug("Initializing EffectController");
+        _audioSource = gameObject.GetComponentInChildren<AudioSource>();
+        _audioSource.volume = 0.5f;
     }
 
-    public override void Enable()
+    protected internal override void Enable()
     {
         gameObject.SetActive(true);
         _phase = FaraBombExplosionPhaseEnum.ExplosionNow;
-        _counter = 0;
+        _timer = 0;
         base.Enable();
-        Plugin.Logger.Debug("FaraBombEffectController enabled");
     }
 
-    public override void Disable()
+    protected internal override void Disable()
     {
         gameObject.SetActive(false);
         _phase = FaraBombExplosionPhaseEnum.Exploded;
         base.Disable();
-        Plugin.Logger.Debug("FaraBombEffectController disabled");
     }
 
-    public bool ExplosionCompleted()
+    internal bool ExplosionCompleted()
     {
         return _phase == FaraBombExplosionPhaseEnum.Exploded;
     }

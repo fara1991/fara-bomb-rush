@@ -1,10 +1,9 @@
 ﻿using FaraBombRush.Enums;
-using FaraBombRush.Interfaces;
 using UnityEngine;
 
 namespace FaraBombRush.Controllers.Components;
 
-public class FaraBombColliderController : FaraBombComponentBase
+internal class FaraBombColliderController : FaraBombComponentBaseController
 {
     private string _collisionSaberName;
     private bool _isCollidedEnter;
@@ -22,25 +21,17 @@ public class FaraBombColliderController : FaraBombComponentBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_isCollidedEnter) return;
-        if (!IsSaberCollider(other))
-        {
-            Plugin.Logger.Debug($"Non-saber collision detected with {other.gameObject.name}");
-            return;
-        }
-
-        Plugin.Logger.Debug($"Saber collision detected: {other.gameObject.name}");
+        if (_isCollidedEnter || !IsSaberCollider(other)) return;
 
         _collisionSaberName = other.gameObject.name;
         _isCollidedEnter = true;
     }
 
-    public override void InitializeComponent()
+    protected override void InitializeComponent()
     {
         // コライダーはbombObjectについているものを使用
         _sphereCollider ??= transform.GetComponent<SphereCollider>();
         EnableCollider();
-        Plugin.Logger.Debug("Initializing ColliderController");
     }
 
     private void EnableCollider()
@@ -48,7 +39,6 @@ public class FaraBombColliderController : FaraBombComponentBase
         _isCollidedEnter = false;
         _collisionSaberName = string.Empty;
         _sphereCollider.enabled = true;
-        Plugin.Logger.Debug("Enable ColliderController");
     }
 
     private void DisableCollider()
@@ -56,7 +46,6 @@ public class FaraBombColliderController : FaraBombComponentBase
         _sphereCollider.enabled = false;
         _isCollidedEnter = false;
         _collisionSaberName = string.Empty;
-        Plugin.Logger.Debug("Disable ColliderController");
     }
 
     private bool IsSaberCollider(Collider collider)
@@ -65,23 +54,23 @@ public class FaraBombColliderController : FaraBombComponentBase
                collider.gameObject.name == SaberObjectEnum.RightSaber.ToString();
     }
 
-    public bool CollisionLeftSaber()
+    internal bool CollisionLeftSaber()
     {
         return _isCollidedEnter && _collisionSaberName == SaberObjectEnum.LeftSaber.ToString();
     }
 
-    public bool CollisionRightSaber()
+    internal bool CollisionRightSaber()
     {
         return _isCollidedEnter && _collisionSaberName == SaberObjectEnum.RightSaber.ToString();
     }
 
-    public override void Enable()
+    protected internal override void Enable()
     {
         base.Enable();
         gameObject.SetActive(true);
     }
 
-    public override void Disable()
+    protected internal override void Disable()
     {
         base.Disable();
         gameObject.SetActive(false);

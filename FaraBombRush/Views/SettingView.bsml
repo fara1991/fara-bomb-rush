@@ -12,23 +12,24 @@
             <list-setting
                     id="game-mode" text="Play Mode" options="game-mode-options" value="selected-game-mode"
                     integer-only="false" apply-on-change="true"
-                    hover-hint="Choose a game mode to play"
+                    hover-hint="Choose a game mode to play."
             />
         </horizontal>
 
-        <!-- ボムコマンド有効判定 -->
-        <horizontal horizontal-fit='PreferredSize' spacing='12'>
-            <checkbox-setting
-                    id="game-mode" text="Valid Bomb Command" value="selected-is-bomb-command-enable"
+        <!-- プレイヤーレベル設定 -->
+        <horizontal horizontal-fit="PreferredSize" spacing="12">
+            <list-setting
+                    id="player-bomb-level" text="Player Bomb Level" options="player-bomb-level-options"
+                    value="selected-player-bomb-level"
                     apply-on-change="true"
-                    hover-hint="Choose bomb command"
+                    hover-hint="~player-recommend-level"
             />
         </horizontal>
 
         <!-- ボム当たり判定 -->
         <horizontal horizontal-fit='PreferredSize' spacing='12'>
             <checkbox-setting
-                    id="game-mode" text="Valid Bomb Collision" value="selected-is-bomb-cut-enable"
+                    id="is-bomb-cut-enable" text="Valid Bomb Collision" value="selected-is-bomb-cut-enable"
                     apply-on-change="true"
                     hover-hint="Choose bomb collision"
             />
@@ -48,7 +49,7 @@
         <horizontal horizontal-fit='PreferredSize' spacing='10'>
             <increment-setting
                     id="bomb-spawn-distance" text="Bomb Spawn Distance" value="selected-bomb-spawn-distance"
-                    min="20.0" max="50.0" increment="5.0"
+                    min="10.0" max="30.0" increment="5.0"
                     integer-only="true" apply-on-change="true"
                     hover-hint="Adjust the distance at which bombs appear"
             />

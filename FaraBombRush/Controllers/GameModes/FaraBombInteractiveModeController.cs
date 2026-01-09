@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+// using ChatCore;
+// using ChatCore.Interfaces;
+using CatCore;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Services.Twitch.Interfaces;
 using ChatCore;
 using ChatCore.Interfaces;
-using FaraBombRush.Configs;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
-using static FaraBombRush.Enums.NoteLineCustomEnum;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers.GameModes;
 
-public class FaraBombInteractiveModeController : FaraBombGameModeBase
+internal class FaraBombInteractiveModeController : FaraBombGameModeBaseController
 {
     private const string BaseCommand = "!bomb";
     private const string LineCommand = "!bombline";
@@ -21,13 +23,20 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
 
     private void Start()
     {
+        var catCoreInstance = CatCoreInstance.Create();
         var chatCoreInstance = ChatCoreInstance.Create();
+        catCoreInstance.RunAllServices().GetTwitchPlatformService().OnTextMessageReceived += CatCoreOnTextMessageReceived;
         chatCoreInstance.RunAllServices().GetTwitchService().OnTextMessageReceived += ChatCoreOnTextMessageReceived;
     }
 
     private void Update()
     {
         BombPush();
+    }
+
+    private void CatCoreOnTextMessageReceived(ITwitchService service, TwitchMessage message)
+    {
+        if (service.DefaultChannel.Name != "" && CheckCommand(message.Message)) _commands.Add(message.Message);
     }
 
     private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
@@ -42,12 +51,7 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
         if (!chat.Contains(BaseCommand) && !chat.Contains(LineCommand) && !chat.Contains(ResetCommand))
             return false;
         if (chatSplit.Length != 2 || !int.TryParse(chatSplit[1], out var pos)) return true;
-        return pos >= 1 && NotePositionEnumList.Count >= pos;
-    }
-
-    public void SendCommand(string command)
-    {
-        _commands.Add(command);
+        return 1 <= pos && pos <= NotePositionEnum.BottomRight.GetValue() + 1;
     }
 
     protected override void BombPush()
@@ -59,34 +63,46 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
         }
     }
 
-    private void CommandAnalysis(string chat)
+    private void CommandAnalysis(string command)
     {
         // bomb制御用に適用なIDを付与
         BombId = BombId >= int.MaxValue ? 1 : BombId + 1;
 
-        var replaceChatList = chat.Split(' ');
-        var pos = replaceChatList.Length == 2
+        var replaceChatList = command.Split(' ');
+        var posIndex = replaceChatList.Length == 2
             ? replaceChatList[1]
             : Random.Range(1, NotePositionEnumList.Count).ToString();
 
-        if (!int.TryParse(pos, out var posInt)) return;
+        if (!int.TryParse(posIndex, out var posInt)) return;
+        var notePositionEnum = NotePositionEnumHelper.FromValue(posInt);
 
+        var startPos = 0;
+        var endPos = Config.BombLineCount;
         var bombCommandListModel = new List<BombCommandModel>();
-        Plugin.Logger.Debug(Config.ToString());
-        if (chat.Contains(LineCommand))
+        if (command.Contains(LineCommand))
         {
-            for (var i = 0; i < Config.BombLineCount; i++)
+            for (var i = startPos; i < endPos; i++)
                 bombCommandListModel.Add(new BombCommandModel
                 {
                     BombId = BombId,
                     SpawnDelayTime = BombLineDiffBeat * i,
-                    PositionIndex = posInt - 1
+                    PositionIndex = notePositionEnum.GetValue()
                 });
         }
-        else if (chat.Contains(ResetCommand))
+        else if (command.Contains(ResetCommand))
         {
-            SearchStartAndEndPosition(posInt, out var start, out var end);
-            for (var i = start; i <= end; i++)
+            if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
+            {
+                startPos = NotePositionEnum.TopLeft.GetValue();
+                endPos = NotePositionEnum.TopRight.GetValue();
+            }
+            else
+            {
+                startPos = NotePositionEnum.BottomLeft.GetValue();
+                endPos = NotePositionEnum.BottomRight.GetValue();
+            }
+
+            for (var i = startPos; i <= endPos; i++)
                 bombCommandListModel.Add(new BombCommandModel
                 {
                     BombId = BombId,
@@ -94,43 +110,16 @@ public class FaraBombInteractiveModeController : FaraBombGameModeBase
                     PositionIndex = i
                 });
         }
-        else if (chat.Contains(BaseCommand))
+        else if (command.Contains(BaseCommand))
         {
             bombCommandListModel.Add(new BombCommandModel
             {
                 BombId = BombId,
                 SpawnDelayTime = 0,
-                PositionIndex = posInt - 1
+                PositionIndex = notePositionEnum.GetValue()
             });
         }
 
         FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
-    }
-
-    private void SearchStartAndEndPosition(int posInt, out int start, out int end)
-    {
-        var e = (NoteLineCustomEnum)(posInt - 1);
-        if (e.IsTopPosition())
-        {
-            start = TopLeft.GetPositionIndex();
-            end = TopRight.GetPositionIndex();
-        }
-        else if (e.IsBottomPosition())
-        {
-            start = BottomLeft.GetPositionIndex();
-            end = BottomRight.GetPositionIndex();
-        }
-        else if (e.IsCenterPosition())
-        {
-            start = CenterLeft.GetPositionIndex();
-            end = CenterRight.GetPositionIndex();
-        }
-        else
-        {
-            // 万が一変な数値が来たらBottomのボムリセとして扱う
-            Plugin.Logger.Debug($"Outbound value. pos: {posInt}.");
-            start = BottomLeft.GetPositionIndex();
-            end = BottomRight.GetPositionIndex();
-        }
     }
 }

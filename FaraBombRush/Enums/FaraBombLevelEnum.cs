@@ -1,42 +1,46 @@
 ﻿using System;
+using FaraBombRush.Controllers.Menus;
 
 namespace FaraBombRush.Enums;
 
-public class FaraBombLevelEnum
+public enum FaraBombLevelEnum
 {
-    public enum PlayerLevel
-    {
-        Beginner,
-        Easy,
-        Normal,
-        Hard,
-        Expert,
-        ExpertPlus,
-        Lawless
-    }
+    Beginner,
+    Easy,
+    Normal,
+    Hard,
+    Expert,
+    ExpertPlus,
+    Lawless
+}
 
+public static class FaraBombLevelEnumHelper
+{
     public static int GetLevelIndex(string levelName)
     {
-        if (Enum.TryParse(levelName, out PlayerLevel level))
-        {
-            return (int)level;
-        }
+        if (Enum.TryParse(levelName, out FaraBombLevelEnum levelEnum)) return (int)levelEnum;
 
         Plugin.Logger.Error($"Unknown player level: {levelName}");
-        return (int)PlayerLevel.Normal;
+        return (int)FaraBombLevelEnum.Normal;
     }
 
-    public static PlayerLevel GetLevel(float pp)
+    private static FaraBombLevelEnum GetLevelEnum(float pp)
     {
         return pp switch
         {
-            < 2000 => PlayerLevel.Beginner,
-            < 4000 => PlayerLevel.Easy,
-            < 6000 => PlayerLevel.Normal,
-            < 8000 => PlayerLevel.Hard,
-            < 10000 => PlayerLevel.Expert,
-            < 12000 => PlayerLevel.ExpertPlus,
-            _ => PlayerLevel.Lawless
+            < 2000 => FaraBombLevelEnum.Beginner,
+            < 4000 => FaraBombLevelEnum.Easy,
+            < 6000 => FaraBombLevelEnum.Normal,
+            < 8000 => FaraBombLevelEnum.Hard,
+            < 10000 => FaraBombLevelEnum.Expert,
+            < 12000 => FaraBombLevelEnum.ExpertPlus,
+            _ => FaraBombLevelEnum.Lawless
         };
+    }
+
+    public static FaraBombLevelEnum GetLevelEnum()
+    {
+        var pp = LoadSteamController.ScoreSaberPP;
+        return GetLevelEnum(pp);
     }
 }

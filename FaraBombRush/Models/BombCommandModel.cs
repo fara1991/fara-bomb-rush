@@ -1,10 +1,10 @@
 ﻿namespace FaraBombRush.Models;
 
-public class BombCommandModel
+internal class BombCommandModel
 {
-    public int BombId { get; set; }
+    internal int BombId { get; set; }
 
-    public int PositionIndex { get; set; }
+    internal int PositionIndex { get; set; }
 
-    public float SpawnDelayTime { get; set; }
+    internal float SpawnDelayTime { get; set; }
 }

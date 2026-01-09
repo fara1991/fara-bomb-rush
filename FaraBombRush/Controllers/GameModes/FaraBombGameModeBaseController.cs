@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using FaraBombRush.Configs;
-using static FaraBombRush.Enums.NoteLineCustomEnum;
+using FaraBombRush.Enums;
 using UnityEngine;
 using Zenject;
 
 namespace FaraBombRush.Controllers.GameModes;
 
-public class FaraBombGameModeBase : MonoBehaviour
+internal class FaraBombGameModeBaseController : MonoBehaviour
 {
-    protected readonly List<NotePosition> NotePositionEnumList =
-        Enum.GetValues(typeof(NotePosition)).Cast<NotePosition>().ToList();
     protected const float BombLineDiffBeat = 1.0f;
+
+    protected readonly List<NotePositionEnum> NotePositionEnumList =
+        Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
+
     protected int BombId;
     protected PluginConfig Config;
 
@@ -24,6 +26,5 @@ public class FaraBombGameModeBase : MonoBehaviour
 
     protected virtual void BombPush()
     {
-
     }
 }

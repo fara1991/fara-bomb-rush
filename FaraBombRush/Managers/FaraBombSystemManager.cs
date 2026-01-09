@@ -6,23 +6,21 @@ using System.Linq;
 using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
-using static FaraBombRush.Enums.GamePauseStepEnum;
-using static FaraBombRush.Enums.ErrorCodeEnum;
-using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
+using FaraBombRush.Controllers.Menus;
+using FaraBombRush.Enums;
 using FaraBombRush.Exceptions;
 using FaraBombRush.Models;
+using FaraBombRush.Patches;
 using UnityEngine;
 using Zenject;
-using FaraBombRush.Patches;
 
 namespace FaraBombRush.Managers;
 
-public class FaraBombSystemManager : MonoBehaviour
+internal class FaraBombSystemManager : MonoBehaviour
 {
     private const string FaraBombAssetName = "FaraBomb";
     private const int MaxOnceAddBomb = 3;
     private const int WaitAddBombFrame = 30;
-    private static readonly int ShaderColor = Shader.PropertyToID("_Color");
 
     private readonly string _faraBombAssetPath =
         Path.Combine(Environment.CurrentDirectory, "UserData", "FaraBombRush", "farabomb.particle");
@@ -42,31 +40,19 @@ public class FaraBombSystemManager : MonoBehaviour
     private int _waitFrame;
 
     // コマンドキュー
-    public static ConcurrentQueue<List<BombCommandModel>> CommandQueue { get; } = new();
-
-    [Inject]
-    private void Construct(PluginConfig config)
-    {
-        _config = config;
-    }
+    internal static ConcurrentQueue<List<BombCommandModel>> CommandQueue { get; } = new();
 
     private void Awake()
     {
-        if (!_config.IsBombCommandEnable)
-        {
-            enabled = false;
-            return;
-        }
-
         InitializeComponents();
     }
 
     private void Update()
     {
-        if (!enabled || !_config.IsBombCommandEnable) return;
+        if (!enabled) return;
 
-        FaraBombComponentPause(GamePausePatch.GamePauseStep);
-        if (GamePausePatch.GamePauseStep != GamePauseStep.Resume) return;
+        FaraBombComponentPause(GamePausePatch.GamePauseStepEnum);
+        if (GamePausePatch.GamePauseStepEnum != GamePauseStepEnum.Resume) return;
         ProcessCommandQueue();
         UpdateActiveBombs();
         CleanupInvalidBombs();
@@ -78,6 +64,12 @@ public class FaraBombSystemManager : MonoBehaviour
         _poolController?.Cleanup();
         if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
         _assetBundle?.Unload(true);
+    }
+
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
     }
 
     private void InitializeComponents()
@@ -93,39 +85,17 @@ public class FaraBombSystemManager : MonoBehaviour
         {
             _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
-
-            // レンダラーの状態を確認
-            var renderers = prefab.GetComponentsInChildren<Renderer>(true);
-            foreach (var renderer in renderers)
-            {
-                if (renderer.gameObject.name != "FaraBombObject") continue;
-
-                var material = renderer.sharedMaterial;
-                if (material is null) continue;
-
-                var newMaterial = new Material(material)
-                {
-                    // FaraBombObject用の設定
-                    // シェーダーと基本的な設定のみ変更
-                    shader = Shader.Find("Standard")
-                };
-
-                // 紫以外ありえない
-                if (newMaterial.HasProperty(ShaderColor))
-                    newMaterial.SetColor(ShaderColor, new Color(192f / 255f, 64f / 255f, 255f / 255f));
-
-                renderer.material = newMaterial;
-            }
-
+            
             _faraBombManagementPrefab = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             _faraBombManagementPrefab.SetActive(false);
 
             Destroy(prefab);
-            Plugin.Logger.Debug("FaraBomb prefab initialized successfully");
+            // _assetBundle.Unload(false);
+            Plugin.Logger.Info("FaraBomb prefab initialized successfully");
         }
         catch (Exception ex)
         {
-            throw new FaraBombException(ex.Message, ErrorCode.DoesNotExistPrefab);
+            throw new FaraBombException(ex.Message, ErrorCodeEnum.DoesNotExistPrefab);
         }
     }
 
@@ -133,14 +103,14 @@ public class FaraBombSystemManager : MonoBehaviour
     {
         _scoreController = gameObject.AddComponent<FaraBombScoreController>();
         _scoreController.Enable();
-        Plugin.Logger.Debug("ScoreSystem initialized successfully");
+        Plugin.Logger.Info("ScoreSystem initialized successfully");
     }
 
     private void InitializePool()
     {
         _poolController = new FaraBombManagementPoolController();
         _poolController.Initialize(_faraBombManagementPrefab, _config);
-        Plugin.Logger.Debug("Pool initialized successfully");
+        Plugin.Logger.Info("Pool initialized successfully");
     }
 
     private void ProcessCommandQueue()
@@ -175,17 +145,15 @@ public class FaraBombSystemManager : MonoBehaviour
     {
         var activeItems = _poolController.GetActiveItems();
         foreach (var component in activeItems)
-        {
             switch (component.GetFaraBombScoreMode())
             {
-                case ScoreMode.AddScore:
+                case FaraBombCalcScoreEnum.AddScore:
                     _scoreController.BombThrough();
                     break;
-                case ScoreMode.SubtractScore:
+                case FaraBombCalcScoreEnum.SubtractScore:
                     _scoreController.BombCut();
                     break;
             }
-        }
 
         var invalidBombs = activeItems
             .Where(bomb => bomb.IsInvalid())
@@ -200,23 +168,22 @@ public class FaraBombSystemManager : MonoBehaviour
         var comboRate = _scoreController.FaraBombComboRate;
         var throughCount = _scoreController.FaraBombThroughCount;
         var throughComboCount = _scoreController.FaraBombThroughComboCount;
-        var level = _scoreController.MagnificationByLevel;
 
         using var writer = new StreamWriter(_faraBombScorePath, false);
         writer.WriteLine(
             $"""
-             FaraBombRush Debug
-             Score: {score}
+             Debug
+             Score: {score.ToString()}
              ComboRate: {comboRate}
              ThroughCount: {throughCount}
              ThroughComboCount: {throughComboCount}
-             Level: {level}
+             Level: {FaraBombLevelEnumHelper.GetLevelEnum().ToString()}
              """
         );
     }
 
-    private void FaraBombComponentPause(GamePauseStep pauseStep)
+    private void FaraBombComponentPause(GamePauseStepEnum gamePauseStepEnum)
     {
-        _poolController.SetPause(pauseStep);
+        _poolController.SetPause(gamePauseStepEnum);
     }
 }

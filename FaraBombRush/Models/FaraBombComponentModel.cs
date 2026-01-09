@@ -3,16 +3,16 @@ using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
 using FaraBombRush.Enums;
 using UnityEngine;
-using static FaraBombRush.Enums.GamePauseStepEnum;
-using static FaraBombRush.Enums.FaraBombCalcScoreEnum;
 
 namespace FaraBombRush.Models;
 
 /// <summary>
 ///     FaraBombの全コンポーネントを管理するクラス
 /// </summary>
-public class FaraBombComponentModel : MonoBehaviour
+internal class FaraBombComponentModel : MonoBehaviour
 {
+    private GamePauseStepEnum _gamePauseStepEnum = GamePauseStepEnum.Resume;
+
     // 各コンポーネントへの参照
     private FaraBombCoordinatorController Coordinator { get; set; }
     private FaraBombColliderController Collider { get; set; }
@@ -24,14 +24,13 @@ public class FaraBombComponentModel : MonoBehaviour
     private GameObject BombObject { get; set; }
     private GameObject EffectObject { get; set; }
 
-    private GamePauseStep _gamePauseStep = GamePauseStep.Resume;
-
     private void OnDisable()
     {
         DisableComponents();
     }
 
-    public void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject, PluginConfig pluginConfig)
+    internal void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject,
+        PluginConfig pluginConfig)
     {
         RootObject = rootObject;
         BombObject = bombObject;
@@ -43,10 +42,7 @@ public class FaraBombComponentModel : MonoBehaviour
         Coordinator = RootObject.AddComponent<FaraBombCoordinatorController>();
         Move = RootObject.AddComponent<FaraBombMoveController>();
         Effect = EffectObject.AddComponent<FaraBombEffectController>();
-        if (pluginConfig.IsBombCutEnable)
-        {
-            Collider = BombObject.AddComponent<FaraBombColliderController>();
-        }
+        if (pluginConfig.IsBombCutEnable) Collider = BombObject.AddComponent<FaraBombColliderController>();
 
         Collider?.Initialize(pluginConfig);
         Move?.Initialize(pluginConfig);
@@ -54,7 +50,7 @@ public class FaraBombComponentModel : MonoBehaviour
         Coordinator.Setup(Collider, Move, Effect);
     }
 
-    public void OnSpawned()
+    internal void OnSpawned()
     {
         EnableComponents();
         RootObject?.SetActive(true);
@@ -62,7 +58,7 @@ public class FaraBombComponentModel : MonoBehaviour
         EffectObject?.SetActive(true);
     }
 
-    public void OnDespawned()
+    internal void OnDespawned()
     {
         DisableComponents();
         RootObject?.SetActive(false);
@@ -86,38 +82,38 @@ public class FaraBombComponentModel : MonoBehaviour
         if (Effect is not null) Effect.enabled = false;
     }
 
-    public void InitializeWithCommand(BombCommandModel command)
+    internal void InitializeWithCommand(BombCommandModel command)
     {
         Coordinator?.InitializeWithCommand(command);
     }
 
-    public void UpdateState()
+    internal void UpdateState()
     {
         Coordinator?.UpdateState();
     }
 
-    public bool IsInvalid()
+    internal bool IsInvalid()
     {
         return Coordinator.IsInvalid();
     }
 
-    internal void SetPause(GamePauseStep pauseStep)
+    internal void SetPause(GamePauseStepEnum gamePauseStepEnum)
     {
-        if (_gamePauseStep == pauseStep) return;
+        if (_gamePauseStepEnum == gamePauseStepEnum) return;
 
-        switch (pauseStep)
+        switch (gamePauseStepEnum)
         {
-            case GamePauseStep.Pause:
+            case GamePauseStepEnum.Pause:
                 RootObject.SetActive(false);
                 break;
-            case GamePauseStep.WillResume:
+            case GamePauseStepEnum.WillResume:
                 RootObject.SetActive(true);
                 Coordinator.enabled = true;
                 Collider.enabled = false;
                 Move.enabled = false;
                 Effect.enabled = false;
                 break;
-            case GamePauseStep.Resume:
+            case GamePauseStepEnum.Resume:
                 RootObject.SetActive(true);
                 Coordinator.enabled = true;
                 Collider.enabled = true;
@@ -125,10 +121,11 @@ public class FaraBombComponentModel : MonoBehaviour
                 Effect.enabled = true;
                 break;
         }
-        _gamePauseStep = pauseStep;
+
+        _gamePauseStepEnum = gamePauseStepEnum;
     }
 
-    public ScoreMode GetFaraBombScoreMode()
+    internal FaraBombCalcScoreEnum GetFaraBombScoreMode()
     {
         return Coordinator.GetScoreMode();
     }

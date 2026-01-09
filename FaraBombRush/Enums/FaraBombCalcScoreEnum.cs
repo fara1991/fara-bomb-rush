@@ -1,11 +1,8 @@
 ﻿namespace FaraBombRush.Enums;
 
-public static class FaraBombCalcScoreEnum
+public enum FaraBombCalcScoreEnum
 {
-    public enum ScoreMode
-    {
-        None,
-        AddScore,
-        SubtractScore,
-    }
+    None,
+    AddScore,
+    SubtractScore
 }

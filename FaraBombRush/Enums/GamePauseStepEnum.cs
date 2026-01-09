@@ -1,11 +1,8 @@
 ﻿namespace FaraBombRush.Enums;
 
-public static class GamePauseStepEnum
+public enum GamePauseStepEnum
 {
-    public enum GamePauseStep
-    {
-        Pause,
-        WillResume,
-        Resume,
-    }
+    Pause,
+    WillResume,
+    Resume
 }
