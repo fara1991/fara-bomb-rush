@@ -13,8 +13,14 @@ namespace FaraBombRush.ViewControllers;
 internal class SettingViewController : BSMLResourceViewController
 {
     private PluginConfig _config;
-    private FaraBombLevelEnum _playerLevelEnum;
-    private float _playerPP;
+    private readonly FaraBombLevelEnum _playerLevelEnum = FaraBombLevelEnumHelper.GetLevelEnum();
+    private readonly float _playerPP = LoadSteamController.ScoreSaberPP;
+
+    [Inject]
+    private void Construct(PluginConfig config)
+    {
+        _config = config;
+    }
 
     [UIValue("game-mode-options")]
     private List<object> GameModeOptions = Enum.GetNames(typeof(GameModeEnum)).ToList<object>();
@@ -61,25 +67,5 @@ internal class SettingViewController : BSMLResourceViewController
     {
         get => _config.BombSpawnDistance;
         set => _config.BombSpawnDistance = value;
-    }
-
-    protected override void OnDestroy()
-    {
-        LoadSteamController.OnChanged -= HandleChanged;
-        base.OnDestroy();
-    }
-
-    [Inject]
-    private void Construct(PluginConfig config)
-    {
-        _config = config;
-        LoadSteamController.OnChanged += HandleChanged;
-    }
-
-    private void HandleChanged(object sender, float pp)
-    {
-        Plugin.Logger.Info($"Get Player PP: {pp}");
-        _playerPP = pp;
-        _playerLevelEnum = FaraBombLevelEnumHelper.GetLevelEnum(pp);
     }
 }

@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
 using FaraBombRush.Models;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace FaraBombRush.Controllers.GameModes;
 
 internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 {
-    private int _noteCutCount;
     private int _playerBombLevel;
 
+    private float _timer;
+    private const float Interval = 1.0f;
 
     private void Start()
     {
@@ -25,13 +27,13 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
     protected override void BombPush()
     {
-        if (_noteCutCount < 180)
+        if (_timer < Interval)
         {
-            _noteCutCount++;
+            _timer += Time.deltaTime;
         }
         else
         {
-            _noteCutCount -= 180;
+            _timer = 0f;
             CalcBombPattern();
         }
     }
@@ -123,16 +125,19 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
                             notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
 
                         for (var j = 0; j < Config.BombLineCount; j++)
+                        {
+
                             bombCommandListModel.Add(new BombCommandModel
                             {
                                 BombId = BombId,
                                 SpawnDelayTime = BombLineDiffBeat * j,
                                 PositionIndex = notePositionEnum.GetValue()
                             });
-                        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                        }
                         selectedPosList.Add(notePositionEnum);
                     }
 
+                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
                     break;
                 }
             default:

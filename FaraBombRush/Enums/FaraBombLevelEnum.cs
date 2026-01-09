@@ -1,4 +1,5 @@
 ﻿using System;
+using FaraBombRush.Controllers.Menus;
 
 namespace FaraBombRush.Enums;
 
@@ -23,7 +24,7 @@ public static class FaraBombLevelEnumHelper
         return (int)FaraBombLevelEnum.Normal;
     }
 
-    public static FaraBombLevelEnum GetLevelEnum(float pp)
+    private static FaraBombLevelEnum GetLevelEnum(float pp)
     {
         return pp switch
         {
@@ -35,5 +36,11 @@ public static class FaraBombLevelEnumHelper
             < 12000 => FaraBombLevelEnum.ExpertPlus,
             _ => FaraBombLevelEnum.Lawless
         };
+    }
+
+    public static FaraBombLevelEnum GetLevelEnum()
+    {
+        var pp = LoadSteamController.ScoreSaberPP;
+        return GetLevelEnum(pp);
     }
 }
