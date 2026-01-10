@@ -85,7 +85,7 @@ internal class FaraBombSystemManager : MonoBehaviour
         {
             _assetBundle = AssetBundle.LoadFromFile(_faraBombAssetPath);
             var prefab = _assetBundle.LoadAsset<GameObject>(FaraBombAssetName);
-            
+
             _faraBombManagementPrefab = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             _faraBombManagementPrefab.SetActive(false);
 

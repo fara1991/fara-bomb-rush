@@ -114,10 +114,10 @@
             <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="BS_Utils">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+            <HintPath>$(BeatSaberDir)\Plugins\BS_Utils.dll</HintPath>
         </Reference>
         <Reference Include="CatCore">
-          <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Libs\CatCore.dll</HintPath>
+            <HintPath>$(BeatSaberDir)\Libs\CatCore.dll</HintPath>
         </Reference>
         <Reference Include="ChatCore">
             <HintPath>$(BeatSaberDir)\Plugins\ChatCore.dll</HintPath>
@@ -149,7 +149,7 @@
             <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="Newtonsoft.Json">
-            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Newtonsoft.Json.dll</HintPath>
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Newtonsoft.Json.dll</HintPath>
         </Reference>
         <Reference Include="SiraUtil, Version=3.1.2.0, Culture=neutral, processorArchitecture=MSIL">
             <Private>False</Private>
@@ -157,7 +157,7 @@
             <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="Steamworks.NET">
-            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Steamworks.NET.dll</HintPath>
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Steamworks.NET.dll</HintPath>
         </Reference>
         <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"/>
         <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -170,7 +170,7 @@
             <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="UnityEngine.AudioModule">
-            <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
             <Private>False</Private>

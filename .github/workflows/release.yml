@@ -1,0 +1,109 @@
+﻿name: Build and Release
+
+on:
+  push:
+    tags:
+      - '[0-9]*' # 1.29.1 や 1.29.1-v1.0.0 など、数字で始まるタグで動作
+
+env:
+  BUILD_TYPE: Release
+  PROJECT_NAME: FaraBombRush
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration ${{ env.BUILD_TYPE }} --no-restore
+
+      - name: Create artifact directory
+        run: mkdir artifacts
+
+      - name: Copy Files to Artifacts
+        run: |
+          # 出力パスに net481 が含まれるか確認してください。もし bin\Release 直下なら修正が必要です。
+          if exist FaraBombRush\bin\Release\net481\ (
+            copy FaraBombRush\bin\Release\net481\FaraBombRush.dll artifacts\
+          ) else (
+            copy FaraBombRush\bin\Release\FaraBombRush.dll artifacts\
+          )
+          copy FaraBombRush\manifest.json artifacts\
+          copy FaraBombRush\README.md artifacts\
+        shell: cmd
+
+      - name: Create Zip Archive
+        shell: powershell
+        run: |
+          $tagName = $env:GITHUB_REF_NAME
+          if (-not $tagName) { $tagName = "dev" }
+          # ファイル名にタグ名を含めることで、どのバージョンのZipか明確にします
+          Compress-Archive -Path artifacts\* -DestinationPath "${{ env.PROJECT_NAME }}-$tagName.zip"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}-Binary
+          path: "*.zip"
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: FaraBombRush-Binary
+          path: .
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          TAG_NAME=${GITHUB_REF_NAME}
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 $TAG_NAME^ 2>/dev/null || echo "")
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "## ${{ env.PROJECT_NAME }} ($TAG_NAME)" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "### Changes since $PREVIOUS_TAG" >> $GITHUB_OUTPUT
+            git log --pretty=format:"- %s" $PREVIOUS_TAG..$TAG_NAME >> $GITHUB_OUTPUT
+          else
+            echo "### Release Notes" >> $GITHUB_OUTPUT
+            echo "- Version: $TAG_NAME" >> $GITHUB_OUTPUT
+          fi
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ env.PROJECT_NAME }} ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+          files: "*.zip"
+          # 既に同じタグがある場合、このアクションは更新を試みます。
+          # 確実に別ページにするためには、必ずユニークなタグを打つようにしてください。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
