@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FaraBombRush.Controllers.Menus;
 
 namespace FaraBombRush.Enums;

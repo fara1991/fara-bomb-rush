@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BeatSaberMarkupLanguage.Attributes;
@@ -60,12 +60,5 @@ internal class SettingViewController : BSMLResourceViewController
     {
         get => _config.BombLineCount;
         set => _config.BombLineCount = value;
-    }
-
-    [UIValue("selected-bomb-spawn-distance")]
-    private float BombSpawnDistance
-    {
-        get => _config.BombSpawnDistance;
-        set => _config.BombSpawnDistance = value;
     }
 }

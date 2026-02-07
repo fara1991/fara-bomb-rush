@@ -1,4 +1,4 @@
-﻿using FaraBombRush.Configs;
+using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
 using FaraBombRush.Controllers.GameModes;
@@ -21,6 +21,11 @@ public class SongPlayCustomInstaller : Installer
     public override void InstallBindings()
     {
         if (_config.GameMode == GameModeEnum.None.ToString()) return;
+
+        // Beat Saber's audio and spawn system
+        Container.Bind<AudioTimeSyncController>().FromResolve();
+        Container.Bind<BeatmapObjectSpawnController.InitData>().FromResolve().AsCached();
+        Container.Bind<IDifficultyBeatmap>().FromResolve().AsCached();
 
         Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()

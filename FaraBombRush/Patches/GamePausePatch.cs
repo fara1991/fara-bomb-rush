@@ -1,4 +1,4 @@
-﻿using FaraBombRush.Enums;
+using FaraBombRush.Enums;
 using HarmonyLib;
 
 namespace FaraBombRush.Patches;

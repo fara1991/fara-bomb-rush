@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FaraBombRush.Configs;
 using FaraBombRush.Dependencies;
 using HarmonyLib;

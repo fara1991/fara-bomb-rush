@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -20,21 +20,20 @@ public enum NotePositionEnum
 
 public static class NotePositionEnumHelper
 {
-    private const float SpawnZ = 30.0f;
     private const float DefaultPlayerHeight = 140f;
 
-    private static readonly Vector3[] PositionCoordinates =
+    private static readonly Vector2[] PositionCoordinates =
     [
-        new(-0.9f, 1.7f, SpawnZ), // TopLeft
-        new(-0.3f, 1.7f, SpawnZ), // TopMiddleLeft
-        new(0.3f, 1.7f, SpawnZ), // TopMiddleRight
-        new(0.9f, 1.7f, SpawnZ), // TopRight
-        new(-0.9f, 1.2f, SpawnZ), // CenterLeft
-        new(0.9f, 1.2f, SpawnZ), // CenterRight
-        new(-0.9f, 0.7f, SpawnZ), // BottomLeft
-        new(-0.3f, 0.7f, SpawnZ), // BottomMiddleLeft
-        new(0.3f, 0.7f, SpawnZ), // BottomMiddleRight
-        new(0.9f, 0.7f, SpawnZ) // BottomRight
+        new(-0.9f, 1.7f), // TopLeft
+        new(-0.3f, 1.7f), // TopMiddleLeft
+        new(0.3f, 1.7f), // TopMiddleRight
+        new(0.9f, 1.7f), // TopRight
+        new(-0.9f, 1.2f), // CenterLeft
+        new(0.9f, 1.2f), // CenterRight
+        new(-0.9f, 0.7f), // BottomLeft
+        new(-0.3f, 0.7f), // BottomMiddleLeft
+        new(0.3f, 0.7f), // BottomMiddleRight
+        new(0.9f, 0.7f) // BottomRight
     ];
 
     public static int GetValue(this NotePositionEnum notePosition) => (int)notePosition;
@@ -51,12 +50,10 @@ public static class NotePositionEnumHelper
         return values[UnityEngine.Random.Range(0, values.Count)];
     }
 
-    public static Vector3 GetNotePosition(this NotePositionEnum position, float spawnDelayTime,
-        float playerHeight = DefaultPlayerHeight)
+    public static Vector3 GetNotePosition(this NotePositionEnum position, float playerHeight = DefaultPlayerHeight)
     {
         var pos = PositionCoordinates[position.GetIndex()];
-        pos.z += spawnDelayTime;
-        return pos;
+        return new Vector3(pos.x, pos.y, 0); // Z will be set by MoveController
     }
 
     public static bool IsTopPosition(this NotePositionEnum position)
@@ -82,7 +79,19 @@ public static class NotePositionEnumHelper
             return notePositionValue;
         }
 
-        // 一致しないIndexはランダムに再計算
+        // 一致しないIndexはデフォルト値を返すか、エラーログを出してランダムに
+        Plugin.Logger.Warn($"Invalid position value: {value}. Using random position.");
+        return RandomPositionEnum();
+    }
+
+    public static NotePositionEnum FromIndex(int index)
+    {
+        if (Enum.IsDefined(typeof(NotePositionEnum), index))
+        {
+            return (NotePositionEnum)index;
+        }
+
+        Plugin.Logger.Warn($"Invalid position index: {index}. Using random position.");
         return RandomPositionEnum();
     }
 }

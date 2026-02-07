@@ -1,4 +1,4 @@
-﻿using FaraBombRush.Configs;
+using FaraBombRush.Configs;
 using FaraBombRush.Controllers;
 using FaraBombRush.Controllers.Components;
 using FaraBombRush.Enums;
@@ -12,6 +12,9 @@ namespace FaraBombRush.Models;
 internal class FaraBombComponentModel : MonoBehaviour
 {
     private GamePauseStepEnum _gamePauseStepEnum = GamePauseStepEnum.Resume;
+    private AudioTimeSyncController _audioTimeSyncController;
+    private float _njs = 12f;
+    private float _hitZOffset;
 
     // 各コンポーネントへの参照
     private FaraBombCoordinatorController Coordinator { get; set; }
@@ -30,11 +33,15 @@ internal class FaraBombComponentModel : MonoBehaviour
     }
 
     internal void Initialize(GameObject rootObject, GameObject bombObject, GameObject effectObject,
-        PluginConfig pluginConfig)
+        PluginConfig pluginConfig, AudioTimeSyncController audioTimeSyncController = null, float njs = 12f, float hitZOffset = 0.5f)
     {
         RootObject = rootObject;
         BombObject = bombObject;
         EffectObject = effectObject;
+        _audioTimeSyncController = audioTimeSyncController;
+        _njs = njs;
+        _hitZOffset = hitZOffset;
+
         RootObject.transform.position = Vector3.zero;
         BombObject.transform.position = Vector3.zero;
         EffectObject.transform.position = Vector3.zero;
@@ -84,6 +91,12 @@ internal class FaraBombComponentModel : MonoBehaviour
 
     internal void InitializeWithCommand(BombCommandModel command)
     {
+        // Setup movement with timing information
+        if (Move != null && _audioTimeSyncController != null && command.HitTime > 0)
+        {
+            Move.SetupMovement(_njs, _audioTimeSyncController, command.HitTime, _hitZOffset);
+        }
+
         Coordinator?.InitializeWithCommand(command);
     }
 
@@ -108,17 +121,17 @@ internal class FaraBombComponentModel : MonoBehaviour
                 break;
             case GamePauseStepEnum.WillResume:
                 RootObject.SetActive(true);
-                Coordinator.enabled = true;
-                Collider.enabled = false;
-                Move.enabled = false;
-                Effect.enabled = false;
+                if (Coordinator is not null) Coordinator.enabled = true;
+                if (Collider is not null) Collider.enabled = false;
+                if (Move is not null) Move.enabled = false;
+                if (Effect is not null) Effect.enabled = false;
                 break;
             case GamePauseStepEnum.Resume:
                 RootObject.SetActive(true);
-                Coordinator.enabled = true;
-                Collider.enabled = true;
-                Move.enabled = true;
-                Effect.enabled = true;
+                if (Coordinator is not null) Coordinator.enabled = true;
+                if (Collider is not null) Collider.enabled = true;
+                if (Move is not null) Move.enabled = true;
+                if (Effect is not null) Effect.enabled = true;
                 break;
         }
 

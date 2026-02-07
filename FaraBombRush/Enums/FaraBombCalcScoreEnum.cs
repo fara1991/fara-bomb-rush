@@ -1,4 +1,4 @@
-﻿namespace FaraBombRush.Enums;
+namespace FaraBombRush.Enums;
 
 public enum FaraBombCalcScoreEnum
 {
