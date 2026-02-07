@@ -23,6 +23,7 @@
         <LangVersion>12</LangVersion>
         <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
         <NoWarn>MSB3277</NoWarn>
+        <RuntimeIdentifier>win</RuntimeIdentifier>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <Optimize>false</Optimize>

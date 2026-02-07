@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Claude Code
+.claude/
+
+# Build release output
+ReleaseFiles/
