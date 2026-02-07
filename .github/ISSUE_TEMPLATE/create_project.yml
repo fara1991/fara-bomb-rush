@@ -1,0 +1,143 @@
+name: 新しいプロジェクトをリクエスト
+description: Claudeに新しいプロジェクトを作成してもらう
+title: "[PROJECT] "
+labels: ["create_repo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 新しいプロジェクトをリクエスト
+        
+        このフォームに記入して送信すると、自動的に新しいリポジトリが作成されます。
+        
+  - type: input
+    id: repo_name
+    attributes:
+      label: リポジトリ名
+      description: 作成したいリポジトリの名前（小文字、ハイフン区切り）
+      placeholder: my-awesome-project
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: project_type
+    attributes:
+      label: プロジェクトタイプ
+      description: 作成したいプロジェクトの種類
+      options:
+        - Webアプリケーション
+        - API/バックエンド
+        - モバイルアプリ
+        - デスクトップアプリ
+        - CLIツール
+        - ライブラリ/パッケージ
+        - Chrome拡張機能
+        - ダッシュボード/管理画面
+        - ランディングページ
+        - ポートフォリオサイト
+        - ブログ
+        - その他
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: tech_stack
+    attributes:
+      label: 技術スタック
+      description: 使用したいフレームワーク
+      options:
+        - React + TypeScript
+        - Next.js
+        - Vue.js
+        - Nuxt.js
+        - Angular
+        - Svelte
+        - Astro
+        - Vanilla JavaScript/TypeScript
+        - Node.js Express
+        - Python FastAPI
+        - Python Flask
+        - Python Django
+        - Ruby on Rails
+        - Go (Gin/Echo)
+        - Java Spring Boot
+        - C# / .NET (Blazor)
+        - PHP Laravel
+        - React Native
+        - Flutter
+        - Electron
+        - その他（詳細に記載）
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: プロジェクトの説明
+      description: どんなアプリを作りたいか、詳しく説明してください
+      placeholder: |
+        例：
+        ToDoリストアプリを作成したい。
+        機能：
+        - タスクの追加・削除・編集
+        - 優先度設定
+        - 期限管理
+        - ダークモード対応
+    validations:
+      required: true
+      
+  - type: textarea
+    id: features
+    attributes:
+      label: 必要な機能（任意）
+      description: 実装してほしい具体的な機能
+      placeholder: |
+        - ユーザー認証
+        - データベース連携
+        - API連携
+        
+  - type: dropdown
+    id: visibility
+    attributes:
+      label: リポジトリの公開設定
+      options:
+        - プライベート
+        - パブリック
+      default: 0
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: license
+    attributes:
+      label: ライセンス
+      options:
+        - MIT
+        - Apache 2.0
+        - GPL-3.0
+        - なし
+      default: 0
+    validations:
+      required: true
+      
+  - type: checkboxes
+    id: additional_files
+    attributes:
+      label: 追加ファイル
+      description: 含めてほしいファイルを選択
+      options:
+        - label: README.md（詳細な説明付き）
+          required: false
+        - label: .gitignore
+          required: false
+        - label: Docker設定
+          required: false
+        - label: CI/CD設定
+          required: false
+          
+  - type: textarea
+    id: notes
+    attributes:
+      label: その他の要望（任意）
+      description: 追加で伝えたいことがあれば記入してください
+      placeholder: 特定のデザインシステムを使いたい、など

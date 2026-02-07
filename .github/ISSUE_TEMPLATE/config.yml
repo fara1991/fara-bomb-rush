@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 使い方ドキュメント
+    url: https://github.com/fara1991/FaraClaudeCreateRepository#readme
+    about: READMEで詳しい使い方を確認できます
+  - name: 💡 改善提案・バグ報告
+    url: https://github.com/fara1991/FaraClaudeCreateRepository/discussions
+    about: このシステム自体の改善提案はこちら

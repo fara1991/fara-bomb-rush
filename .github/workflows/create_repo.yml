@@ -1,0 +1,389 @@
+name: Create Repository from Issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: create-repo-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'create_repo')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Parse issue body
+        id: parse-issue
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          cat > parse-issue.js << 'ENDOFSCRIPT'
+          const fs = require('fs');
+          const issueBody = process.env.ISSUE_BODY;
+
+          const extractField = (label) => {
+            const regex = new RegExp('### ' + label + '\\s*([\\s\\S]*?)(?=\\n###|$)', 'i');
+            const match = issueBody.match(regex);
+            return match ? match[1].trim() : '';
+          };
+
+          const repoName = extractField('リポジトリ名');
+          const projectType = extractField('プロジェクトタイプ');
+          const techStack = extractField('技術スタック');
+          const description = extractField('プロジェクトの説明');
+          const features = extractField('必要な機能（任意）');
+          const visibility = extractField('リポジトリの公開設定');
+          const license = extractField('ライセンス');
+          const notes = extractField('その他の要望（任意）');
+
+          const workflowTemplate = fs.readFileSync('templates/claude-feature-workflow.yml', 'utf8').replace(/\r/g, '');
+
+          const promptText = '\n# プロジェクト作成リクエスト\n\n' +
+            '## 基本情報\n' +
+            '- リポジトリ名: ' + repoName + '\n' +
+            '- プロジェクトタイプ: ' + projectType + '\n' +
+            '- 技術スタック: ' + techStack + '\n' +
+            '- ライセンス: ' + license + '\n\n' +
+            '## プロジェクトの説明\n' + description + '\n\n' +
+            (features ? '## 必要な機能\n' + features + '\n\n' : '') +
+            (notes ? '## その他の要望\n' + notes + '\n\n' : '') +
+            '完全に動作するプロジェクトを作成してください。\n' +
+            'README.mdには詳細なセットアップ手順とプロジェクトの説明を含めてください。\n\n' +
+            '## 重要：GitHub Actions ワークフローを含める\n\n' +
+            '以下のファイルを必ず含めてください：\n\n' +
+            '.github/workflows/claude-feature.yml\n\n' +
+            'このワークフローは、リポジトリでIssueが作成されたときに、Claudeが既存コードを読み取り、自動でコード変更・追加・削除を行ってPull Requestを作成する高度な機能です。\n\n' +
+            'ワークフローの完全な仕様：\n\n```yaml\n' + workflowTemplate + '\n```\n\n' +
+            '必ずこのワークフローファイルを .github/workflows/claude-feature.yml として含めてください。\n\n' +
+            '## 重要：Issueテンプレートを含める\n\n' +
+            '以下のIssueテンプレートファイルも必ず含めてください：\n\n' +
+            '.github/ISSUE_TEMPLATE/feature_request.yml\n' +
+            '.github/ISSUE_TEMPLATE/bug_report.yml\n' +
+            '.github/ISSUE_TEMPLATE/enhancement.yml\n\n' +
+            'Issueテンプレートの要件：\n\n' +
+            '### feature_request.yml:\n' +
+            '- name: 新機能のリクエスト\n' +
+            '- labels: ["feature"]\n' +
+            '- フィールド：説明、期待する動作、追加情報（任意）\n' +
+            '- 注意：タイトルフィールドは不要（GitHub の Add a title と重複するため）\n\n' +
+            '### bug_report.yml:\n' +
+            '- name: バグ報告\n' +
+            '- labels: ["bug"]\n' +
+            '- フィールド：バグの説明、再現手順、期待する動作、実際の動作、環境情報、スクリーンショット（任意）\n' +
+            '- 注意：タイトルフィールドは不要（GitHub の Add a title と重複するため）\n\n' +
+            '### enhancement.yml:\n' +
+            '- name: 改善提案\n' +
+            '- labels: ["enhancement"]\n' +
+            '- フィールド：改善したい機能、提案内容、メリット\n' +
+            '- 注意：タイトルフィールドは不要（GitHub の Add a title と重複するため）\n\n' +
+            'すべてのテンプレートは日本語で作成してください。タイトル入力欄は GitHub のデフォルト（Add a title）を使用するため、テンプレート内には含めないでください。\n';
+
+          console.log(JSON.stringify({
+            repo_name: repoName.toLowerCase().replace(/\s+/g, '-'),
+            visibility: visibility.includes('プライベート') ? 'private' : 'public',
+            prompt: promptText
+          }));
+          ENDOFSCRIPT
+
+          PARSED=$(node parse-issue.js)
+          echo "data<<EOF" >> $GITHUB_OUTPUT
+          echo "$PARSED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Call Claude API
+        id: claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PARSE_DATA: ${{ steps.parse-issue.outputs.data }}
+        run: |
+          cat > call-claude.js << 'ENDOFSCRIPT'
+          const parseData = JSON.parse(process.env.PARSE_DATA);
+          const prompt = parseData.prompt;
+
+          const requestBody = {
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 32000,
+            messages: [{
+              role: "user",
+              content: prompt + '\n\n以下のJSON形式で出力してください（JSONのみ、説明不要）:\n\n{\n  "repo_name": "リポジトリ名",\n  "description": "1行の説明",\n  "files": {\n    "README.md": "内容",\n    ".github/workflows/claude-feature.yml": "上記の完全なワークフロー内容",\n    ".github/ISSUE_TEMPLATE/feature_request.yml": "機能リクエストテンプレート",\n    ".github/ISSUE_TEMPLATE/bug_report.yml": "バグ報告テンプレート",\n    ".github/ISSUE_TEMPLATE/enhancement.yml": "改善提案テンプレート",\n    "src/index.js": "内容"\n  }\n}\n\n必須ファイル：\n- .github/workflows/claude-feature.yml（上記の Enhanced 版ワークフロー）\n- .github/ISSUE_TEMPLATE/feature_request.yml\n- .github/ISSUE_TEMPLATE/bug_report.yml\n- .github/ISSUE_TEMPLATE/enhancement.yml\n\nこれらは必ず含めてください。ワークフローは上記の仕様通りに作成してください。'
+            }]
+          };
+
+          const repairJson = (str) => {
+            return str
+              .replace(/\\u(?![0-9a-fA-F]{4})/g, '\\\\u')
+              .replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+          };
+
+          const MAX_RETRIES = 3;
+          const TIMEOUT_MS = 300000;
+
+          async function callApi(attempt) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+            try {
+              const res = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': process.env.ANTHROPIC_API_KEY,
+                  'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify(requestBody),
+                signal: controller.signal
+              });
+              const body = await res.text();
+              return body;
+            } finally {
+              clearTimeout(timeoutId);
+            }
+          }
+
+          async function main() {
+            let lastError;
+            for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+              try {
+                if (attempt > 1) {
+                  const delay = attempt * 10000;
+                  console.error('Retry ' + attempt + '/' + MAX_RETRIES + ' after ' + delay / 1000 + 's...');
+                  await new Promise(r => setTimeout(r, delay));
+                }
+
+                console.error('Attempt ' + attempt + '/' + MAX_RETRIES + '...');
+                const body = await callApi(attempt);
+                const response = JSON.parse(body);
+
+                if (response.error) {
+                  console.error('API Error:', response.error);
+                  if (response.error.type === 'overloaded_error') {
+                    lastError = new Error('API overloaded');
+                    continue;
+                  }
+                  process.exit(1);
+                }
+
+                if (!response.content || !response.content[0]) {
+                  console.error('Invalid response structure');
+                  process.exit(1);
+                }
+
+                const content = response.content[0].text;
+                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) {
+                  console.error('JSON not found in response');
+                  process.exit(1);
+                }
+
+                let parsed;
+                try {
+                  parsed = JSON.parse(jsonMatch[0]);
+                } catch (parseError) {
+                  try {
+                    parsed = JSON.parse(repairJson(jsonMatch[0]));
+                    console.error('Note: JSON was auto-repaired');
+                  } catch (repairError) {
+                    console.error('JSON Parse Error:', parseError.message);
+                    process.exit(1);
+                  }
+                }
+
+                console.log(JSON.stringify(parsed, null, 2));
+                return;
+
+              } catch (e) {
+                lastError = e;
+                console.error('Attempt ' + attempt + ' failed: ' + e.message);
+                if (attempt === MAX_RETRIES) {
+                  console.error('All retries exhausted');
+                  process.exit(1);
+                }
+              }
+            }
+          }
+
+          main();
+          ENDOFSCRIPT
+
+          CLAUDE_OUTPUT=$(node call-claude.js)
+
+          echo "output<<EOF" >> $GITHUB_OUTPUT
+          echo "$CLAUDE_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          CLAUDE_OUTPUT: ${{ steps.claude.outputs.output }}
+          VISIBILITY: ${{ fromJSON(steps.parse-issue.outputs.data).visibility }}
+        run: |
+          REPO_NAME=$(echo "$CLAUDE_OUTPUT" | jq -r '.repo_name')
+          REPO_DESC=$(echo "$CLAUDE_OUTPUT" | jq -r '.description')
+
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/user/repos \
+            -d "{\"name\":\"$REPO_NAME\",\"description\":\"$REPO_DESC\",\"private\":$([ "$VISIBILITY" = "private" ] && echo true || echo false),\"auto_init\":false}"
+
+          sleep 2
+
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+
+      - name: Clone and setup repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          CLAUDE_OUTPUT: ${{ steps.claude.outputs.output }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          REPO_NAME="${{ env.REPO_NAME }}"
+
+          git config --global user.name "Claude Bot"
+          git config --global user.email "claude-bot@github-actions"
+          git config --global init.defaultBranch master
+
+          mkdir -p /tmp/new-repo
+          cd /tmp/new-repo
+          git init
+          git branch -M master
+
+          echo "$CLAUDE_OUTPUT" | jq -r '.files | to_entries[] | @json' | while read -r entry; do
+            filepath=$(echo "$entry" | jq -r '.key')
+            content=$(echo "$entry" | jq -r '.value')
+            mkdir -p "$(dirname "$filepath")"
+            echo "$content" > "$filepath"
+          done
+
+          printf 'root = true\n\n[*]\nend_of_line = lf\ncharset = utf-8\ninsert_final_newline = true\n' > .editorconfig
+
+          printf '# Normalize line endings to LF on checkout\n* text=auto eol=lf\n\n# Binary files\n*.png binary\n*.jpg binary\n' > .gitattributes
+
+          git add .
+          git commit -m "Initial commit from Issue #${{ github.event.issue.number }}"
+          git remote add origin "https://$GITHUB_TOKEN@github.com/${{ github.repository_owner }}/$REPO_NAME.git"
+          git push -u origin master
+
+          echo "REPO_URL=https://github.com/${{ github.repository_owner }}/$REPO_NAME" >> $GITHUB_ENV
+
+      - name: Setup Secrets in new repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          REPO_NAME="${{ env.REPO_NAME }}"
+          OWNER="${{ github.repository_owner }}"
+
+          PUBLIC_KEY_RESPONSE=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/actions/secrets/public-key")
+
+          PUBLIC_KEY=$(echo "$PUBLIC_KEY_RESPONSE" | jq -r '.key')
+          KEY_ID=$(echo "$PUBLIC_KEY_RESPONSE" | jq -r '.key_id')
+
+          cat > encrypt-secret.js << 'ENCRYPTSCRIPT'
+          const sodium = require('libsodium-wrappers');
+
+          (async () => {
+            await sodium.ready;
+
+            const publicKey = process.env.PUBLIC_KEY;
+            const secret = process.env.SECRET_VALUE;
+
+            const binkey = sodium.from_base64(publicKey, sodium.base64_variants.ORIGINAL);
+            const binsec = sodium.from_string(secret);
+
+            const encBytes = sodium.crypto_box_seal(binsec, binkey);
+            const output = sodium.to_base64(encBytes, sodium.base64_variants.ORIGINAL);
+
+            console.log(output);
+          })();
+          ENCRYPTSCRIPT
+
+          npm install libsodium-wrappers
+
+          export PUBLIC_KEY="$PUBLIC_KEY"
+          export SECRET_VALUE="$ANTHROPIC_API_KEY"
+          ENCRYPTED_VALUE=$(node encrypt-secret.js)
+
+          curl -X PUT \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/actions/secrets/ANTHROPIC_API_KEY" \
+            -d "{\"encrypted_value\":\"$ENCRYPTED_VALUE\",\"key_id\":\"$KEY_ID\"}"
+
+          echo "ANTHROPIC_API_KEY has been added to $REPO_NAME"
+
+      - name: Create labels in new repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          REPO_NAME="${{ env.REPO_NAME }}"
+          OWNER="${{ github.repository_owner }}"
+
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/labels" \
+            -d '{"name":"feature","description":"New feature or request","color":"0e8a16"}'
+
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/labels" \
+            -d '{"name":"bug","description":"Something is not working","color":"d73a4a"}'
+
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/labels" \
+            -d '{"name":"enhancement","description":"Improvement to existing feature","color":"a2eeef"}'
+
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/labels" \
+            -d '{"name":"refactor","description":"Code refactoring","color":"fbca04"}'
+
+          echo "Labels created in $REPO_NAME"
+
+      - name: Configure Actions permissions in new repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          REPO_NAME="${{ env.REPO_NAME }}"
+          OWNER="${{ github.repository_owner }}"
+
+          curl -X PUT \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/$OWNER/$REPO_NAME/actions/permissions/workflow" \
+            -d '{"default_workflow_permissions":"write","can_approve_pull_request_reviews":true}'
+
+          echo "Actions permissions configured for $REPO_NAME"
+
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const repoUrl = process.env.REPO_URL;
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## リポジトリが作成されました！\n\n[${repoUrl}](${repoUrl})\n\n### AI機能が有効化されています\n\n新しいリポジトリでIssueを作成すると、Claudeが既存コードを読み取り、自動でコード変更・追加・削除を行ってPull Requestを作成します。\n\n**新機能：**\n- 既存ファイルの編集に対応\n- ファイルの追加・削除に対応\n- リファクタリングに対応\n- バグ修正に対応\n\n**使い方：**\n1. 新しいリポジトリでIssueを作成\n2. "feature", "bug", "enhancement", "refactor" のいずれかのラベルを追加\n3. 実装してほしい機能や修正内容を記述\n4. 数分後、自動でPRが作成されます！\n\nClaudeによって自動生成されました。`
+            });
+
+            await github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            });
