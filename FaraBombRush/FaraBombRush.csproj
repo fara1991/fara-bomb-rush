@@ -205,4 +205,11 @@
       <Content Include="Managers\test.log" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Target Name="CopyToBSManager" AfterTargets="Build">
+        <PropertyGroup>
+            <BSManagerPluginsDir>$(USERPROFILE)\BSManager\BSInstances\1.29.1\Plugins</BSManagerPluginsDir>
+        </PropertyGroup>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(BSManagerPluginsDir)"/>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(BSManagerPluginsDir)"/>
+    </Target>
 </Project>
