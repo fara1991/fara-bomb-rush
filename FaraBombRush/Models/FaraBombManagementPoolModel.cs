@@ -14,10 +14,17 @@ internal class FaraBombManagementPoolModel
     private readonly PluginConfig _pluginConfig;
     private readonly Queue<FaraBombComponentModel> _pool;
     private readonly GameObject _rootPrefab;
+    private readonly AudioTimeSyncController _audioTimeSyncController;
+    private readonly float _njs;
+    private readonly float _hitZOffset;
 
-    internal FaraBombManagementPoolModel(GameObject rootObject, PluginConfig pluginConfig)
+    internal FaraBombManagementPoolModel(GameObject rootObject, PluginConfig pluginConfig,
+        AudioTimeSyncController audioTimeSyncController = null, float njs = 12f, float hitZOffset = 0.5f)
     {
         _pluginConfig = pluginConfig;
+        _audioTimeSyncController = audioTimeSyncController;
+        _njs = njs;
+        _hitZOffset = hitZOffset;
         _pool = new Queue<FaraBombComponentModel>();
         _activeItems = [];
         _rootPrefab = rootObject;
@@ -47,7 +54,7 @@ internal class FaraBombManagementPoolModel
         bombInstance.name = FaraBombNameEnum.BombObject.ToString();
         effectInstance.name = FaraBombNameEnum.ParticleEffect.ToString();
 
-        components.Initialize(rootInstance, bombInstance, effectInstance, _pluginConfig);
+        components.Initialize(rootInstance, bombInstance, effectInstance, _pluginConfig, _audioTimeSyncController, _njs, _hitZOffset);
         rootInstance.SetActive(false);
         _pool.Enqueue(components);
     }

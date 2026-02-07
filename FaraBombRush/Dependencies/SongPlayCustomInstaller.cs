@@ -22,6 +22,11 @@ public class SongPlayCustomInstaller : Installer
     {
         if (_config.GameMode == GameModeEnum.None.ToString()) return;
 
+        // Beat Saber's audio and spawn system
+        Container.Bind<AudioTimeSyncController>().FromResolve();
+        Container.Bind<BeatmapObjectSpawnController.InitData>().FromResolve().AsCached();
+        Container.Bind<IDifficultyBeatmap>().FromResolve().AsCached();
+
         Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()
             .AsCached()

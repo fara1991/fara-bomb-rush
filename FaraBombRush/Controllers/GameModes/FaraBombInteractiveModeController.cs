@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-// using ChatCore;
-// using ChatCore.Interfaces;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using CatCore;
 using CatCore.Models.Twitch.IRC;
 using CatCore.Services.Twitch.Interfaces;
@@ -19,14 +17,26 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
     private const string BaseCommand = "!bomb";
     private const string LineCommand = "!bombline";
     private const string ResetCommand = "!bombreset";
-    private readonly List<string> _commands = [];
+    private readonly ConcurrentQueue<string> _commands = new();
+    private ITwitchService _twitchPlatformService;
+    private IChatService _chatCoreService;
 
     private void Start()
     {
         var catCoreInstance = CatCoreInstance.Create();
         var chatCoreInstance = ChatCoreInstance.Create();
-        catCoreInstance.RunAllServices().GetTwitchPlatformService().OnTextMessageReceived += CatCoreOnTextMessageReceived;
-        chatCoreInstance.RunAllServices().GetTwitchService().OnTextMessageReceived += ChatCoreOnTextMessageReceived;
+        _twitchPlatformService = catCoreInstance.RunAllServices().GetTwitchPlatformService();
+        _twitchPlatformService.OnTextMessageReceived += CatCoreOnTextMessageReceived;
+        _chatCoreService = chatCoreInstance.RunAllServices().GetTwitchService();
+        _chatCoreService.OnTextMessageReceived += ChatCoreOnTextMessageReceived;
+    }
+
+    private void OnDestroy()
+    {
+        if (_twitchPlatformService != null)
+            _twitchPlatformService.OnTextMessageReceived -= CatCoreOnTextMessageReceived;
+        if (_chatCoreService != null)
+            _chatCoreService.OnTextMessageReceived -= ChatCoreOnTextMessageReceived;
     }
 
     private void Update()
@@ -36,12 +46,12 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
 
     private void CatCoreOnTextMessageReceived(ITwitchService service, TwitchMessage message)
     {
-        if (service.DefaultChannel.Name != "" && CheckCommand(message.Message)) _commands.Add(message.Message);
+        if (service.DefaultChannel.Name != "" && CheckCommand(message.Message)) _commands.Enqueue(message.Message);
     }
 
     private void ChatCoreOnTextMessageReceived(IChatService service, IChatMessage message)
     {
-        if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Add(message.Message);
+        if (service.DisplayName == "Twitch" && CheckCommand(message.Message)) _commands.Enqueue(message.Message);
     }
 
     private bool CheckCommand(string chat)
@@ -56,17 +66,16 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
 
     protected override void BombPush()
     {
-        foreach (var command in _commands.ToList())
+        while (_commands.TryDequeue(out var command))
         {
             CommandAnalysis(command);
-            _commands.Remove(command);
         }
     }
 
     private void CommandAnalysis(string command)
     {
         // bomb制御用に適用なIDを付与
-        BombId = BombId >= int.MaxValue ? 1 : BombId + 1;
+        int bombId = GetNextBombId();
 
         var replaceChatList = command.Split(' ');
         var posIndex = replaceChatList.Length == 2
@@ -76,50 +85,29 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         if (!int.TryParse(posIndex, out var posInt)) return;
         var notePositionEnum = NotePositionEnumHelper.FromValue(posInt);
 
-        var startPos = 0;
-        var endPos = Config.BombLineCount;
-        var bombCommandListModel = new List<BombCommandModel>();
+        var hitTime = GetCurrentSongTime() + (60f / Bpm) * 4.5f; // Spawn slightly ahead of the spawn timing (4 beats)
+
         if (command.Contains(LineCommand))
         {
-            for (var i = startPos; i < endPos; i++)
+            var bombCommandListModel = new List<BombCommandModel>();
+            for (var i = 0; i < Config.BombLineCount; i++)
+            {
                 bombCommandListModel.Add(new BombCommandModel
                 {
-                    BombId = BombId,
-                    SpawnDelayTime = BombLineDiffBeat * i,
-                    PositionIndex = notePositionEnum.GetValue()
+                    BombId = bombId,
+                    PositionIndex = notePositionEnum.GetValue(),
+                    HitTime = hitTime + (BombLineDiffBeat * i * (60f / Bpm))
                 });
+            }
+            EnqueueBombCommands(bombCommandListModel);
         }
         else if (command.Contains(ResetCommand))
         {
-            if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
-            {
-                startPos = NotePositionEnum.TopLeft.GetValue();
-                endPos = NotePositionEnum.TopRight.GetValue();
-            }
-            else
-            {
-                startPos = NotePositionEnum.BottomLeft.GetValue();
-                endPos = NotePositionEnum.BottomRight.GetValue();
-            }
-
-            for (var i = startPos; i <= endPos; i++)
-                bombCommandListModel.Add(new BombCommandModel
-                {
-                    BombId = BombId,
-                    SpawnDelayTime = 0,
-                    PositionIndex = i
-                });
+            EnqueueBombCommands(CreateResetPatternCommands(bombId, notePositionEnum, hitTime));
         }
         else if (command.Contains(BaseCommand))
         {
-            bombCommandListModel.Add(new BombCommandModel
-            {
-                BombId = BombId,
-                SpawnDelayTime = 0,
-                PositionIndex = notePositionEnum.GetValue()
-            });
+            EnqueueBombCommand(bombId, notePositionEnum.GetValue(), hitTime);
         }
-
-        FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
     }
 }

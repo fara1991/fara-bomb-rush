@@ -6,5 +6,5 @@ internal class BombCommandModel
 
     internal int PositionIndex { get; set; }
 
-    internal float SpawnDelayTime { get; set; }
+    internal float HitTime { get; set; } // Time when bomb should reach the player
 }

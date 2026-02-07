@@ -30,6 +30,11 @@ internal class FaraBombSystemManager : MonoBehaviour
 
     private AssetBundle _assetBundle;
     private PluginConfig _config;
+    private AudioTimeSyncController _audioTimeSyncController;
+    private BeatmapObjectSpawnController.InitData _spawnInitData;
+    private float _njs = 12f;
+    private float _bpm = 120f;
+    private float _hitZOffset = 0.5f;
 
     // プレハブ参照
     private GameObject _faraBombManagementPrefab;
@@ -44,6 +49,8 @@ internal class FaraBombSystemManager : MonoBehaviour
 
     private void Awake()
     {
+        // Clear stale commands from previous song
+        while (CommandQueue.TryDequeue(out _)) { }
         InitializeComponents();
     }
 
@@ -61,15 +68,36 @@ internal class FaraBombSystemManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        // Clear command queue to prevent stale commands leaking to next song
+        while (CommandQueue.TryDequeue(out _)) { }
         _poolController?.Cleanup();
         if (_faraBombManagementPrefab is not null) Destroy(_faraBombManagementPrefab);
         _assetBundle?.Unload(true);
     }
 
     [Inject]
-    private void Construct(PluginConfig config)
+    private void Construct(
+        PluginConfig config,
+        AudioTimeSyncController audioTimeSyncController,
+        [InjectOptional] BeatmapObjectSpawnController.InitData spawnInitData,
+        [InjectOptional] IDifficultyBeatmap difficultyBeatmap)
     {
         _config = config;
+        _audioTimeSyncController = audioTimeSyncController;
+        _spawnInitData = spawnInitData;
+
+        // Get NJS from spawn data
+        if (spawnInitData != null)
+        {
+            _njs = spawnInitData.noteJumpMovementSpeed;
+        }
+
+        // Get BPM from beatmap
+        if (difficultyBeatmap?.level != null)
+        {
+            float bpm = difficultyBeatmap.level.beatsPerMinute;
+            _bpm = bpm > 0 ? bpm : 120f;
+        }
     }
 
     private void InitializeComponents()
@@ -108,9 +136,18 @@ internal class FaraBombSystemManager : MonoBehaviour
 
     private void InitializePool()
     {
+        // マーカーと同様に BeatmapObjectSpawnCenter から HitZOffset を取得する
+        _hitZOffset = 0.5f;
+        var spawnCenter = GameObject.FindObjectOfType<BeatmapObjectSpawnCenter>();
+        if (spawnCenter != null)
+        {
+            _hitZOffset = spawnCenter.transform.position.z + 0.5f;
+            Plugin.Logger.Info($"Found BeatmapObjectSpawnCenter at Z: {spawnCenter.transform.position.z}. Set HitZOffset to: {_hitZOffset}");
+        }
+
         _poolController = new FaraBombManagementPoolController();
-        _poolController.Initialize(_faraBombManagementPrefab, _config);
-        Plugin.Logger.Info("Pool initialized successfully");
+        _poolController.Initialize(_faraBombManagementPrefab, _config, _audioTimeSyncController, _njs, _hitZOffset);
+        Plugin.Logger.Info($"Pool initialized successfully with NJS: {_njs}, HitZOffset: {_hitZOffset}");
     }
 
     private void ProcessCommandQueue()
@@ -119,7 +156,35 @@ internal class FaraBombSystemManager : MonoBehaviour
         if (_waitFrame % WaitAddBombFrame != 0) return;
 
         _waitFrame = 0;
-        if (CommandQueue.TryDequeue(out var commands)) ProcessCommands(commands);
+
+        if (CommandQueue.TryPeek(out var commands))
+        {
+            // Check if any command in the next group is ready to be spawned
+            // We use the first command's HitTime as a reference for the group
+            var firstCommand = commands.FirstOrDefault();
+            if (firstCommand != null)
+            {
+                float songTime = _audioTimeSyncController?.songTime ?? 0f;
+                float timeToHit = firstCommand.HitTime - songTime;
+                
+                // マーカーと同様に4拍前でSpawnさせる
+                // 4拍の時間は (60/BPM)*4
+                float lookAheadTime = (60f / _bpm) * 4f;
+                
+                if (timeToHit <= lookAheadTime)
+                {
+                    if (CommandQueue.TryDequeue(out var readyCommands))
+                    {
+                        ProcessCommands(readyCommands);
+                    }
+                }
+            }
+            else
+            {
+                // Empty list, just dequeue and ignore
+                CommandQueue.TryDequeue(out _);
+            }
+        }
     }
 
     private void ProcessCommands(List<BombCommandModel> commands)

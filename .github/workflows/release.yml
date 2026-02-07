@@ -8,6 +8,7 @@ on:
 env:
   BUILD_TYPE: Release
   PROJECT_NAME: FaraBombRush
+  BS_LIBS: ${{ github.workspace }}/References
 
 jobs:
   build:
@@ -23,6 +24,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Create References Directory
+        run: mkdir ${{ env.BS_LIBS }}
+        
+      - name: Download Beat Saber References
+        shell: powershell
+        run: |
+          # 最小限の構成（UnityEngineなどのコアライブラリ）
+          # 注: 実際にはプロジェクトで使っている全DLLが必要です。
+          # BeatSaberModdingTools を使っている場合、本来はここでそのツールが動く必要があります。
+          Write-Host "Downloading core references..."
+          # ここで必要なDLLをダウンロードする処理が必要ですが、
+          # 最も確実なのは NuGet 経由で参照するように .csproj を修正することです。
 
       - name: Restore dependencies
         run: dotnet restore

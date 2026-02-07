@@ -14,7 +14,8 @@ internal class FaraBombManagementPoolController
     private bool _isInitialized;
     private FaraBombManagementPoolModel _poolModel;
 
-    internal void Initialize(GameObject rootObject, PluginConfig pluginConfig)
+    internal void Initialize(GameObject rootObject, PluginConfig pluginConfig,
+        AudioTimeSyncController audioTimeSyncController = null, float njs = 12f, float hitZOffset = 0.5f)
     {
         if (_isInitialized)
         {
@@ -22,14 +23,14 @@ internal class FaraBombManagementPoolController
             return;
         }
 
-        _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig);
+        _poolModel = new FaraBombManagementPoolModel(rootObject, pluginConfig, audioTimeSyncController, njs, hitZOffset);
         _isInitialized = true;
     }
 
     private Vector3 CalculateSpawnPosition(BombCommandModel commandModel)
     {
-        var noteLineEnum = (NotePositionEnum)commandModel.PositionIndex;
-        return noteLineEnum.GetNotePosition(commandModel.SpawnDelayTime);
+        var noteLineEnum = NotePositionEnumHelper.FromIndex(commandModel.PositionIndex);
+        return noteLineEnum.GetNotePosition();
     }
 
     private void InitializeInstance(FaraBombComponentModel instance, BombCommandModel commandModel)
@@ -50,6 +51,11 @@ internal class FaraBombManagementPoolController
         {
             var spawnPosition = CalculateSpawnPosition(commandModel);
             var instance = _poolModel.Spawn(spawnPosition);
+            if (instance == null)
+            {
+                Plugin.Logger.Warn("Pool exhausted, cannot spawn bomb");
+                return;
+            }
             InitializeInstance(instance, commandModel);
         }
         catch (Exception ex)

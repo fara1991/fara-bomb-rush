@@ -11,13 +11,13 @@ namespace FaraBombRush.Controllers.GameModes;
 internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 {
     private int _playerBombLevel;
-
-    private float _timer;
-    private const float Interval = 1.0f;
+    private int _lastBeatIndex = -1;
+    private float _beatInterval = 1.0f; // Seconds per beat
 
     private void Start()
     {
         _playerBombLevel = FaraBombLevelEnumHelper.GetLevelIndex(Config.PlayerBombLevel);
+        _beatInterval = 60f / Bpm; // Calculate beat interval from BPM
     }
 
     private void Update()
@@ -27,21 +27,46 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
     protected override void BombPush()
     {
-        if (_timer < Interval)
+        if (!IsSongPlaying()) return;
+
+        float songTime = GetCurrentSongTime();
+
+        // Detect song start
+        if (!SongStarted && songTime > 0)
         {
-            _timer += Time.deltaTime;
+            SongStarted = true;
+            SongStartTime = songTime;
         }
-        else
+
+        if (!SongStarted) return;
+
+        // Calculate how many beats ahead we want to spawn bombs
+        // Use a buffer (e.g., 5 beats) to ensure commands are in queue before FaraBombSystemManager needs them
+        // SystemManager spawns at 4 beats ahead, so we need at least that much.
+        float lookAheadTime = _beatInterval * 5.0f;
+        
+        float adjustedTime = songTime - SongStartTime;
+        int maxBeatIndexToSpawn = (int)((adjustedTime + lookAheadTime) / _beatInterval);
+
+        const int maxBeatsPerFrame = 8;
+        int beatsProcessed = 0;
+        while (_lastBeatIndex < maxBeatIndexToSpawn && beatsProcessed < maxBeatsPerFrame)
         {
-            _timer = 0f;
-            CalcBombPattern();
+            _lastBeatIndex++;
+            beatsProcessed++;
+            float hitTime = (_lastBeatIndex * _beatInterval) + SongStartTime;
+
+            // Skip beats that have already passed
+            if (hitTime < songTime) continue;
+
+            CalcBombPattern(hitTime);
         }
     }
 
-    private void CalcBombPattern()
+    private void CalcBombPattern(float hitTime)
     {
         // bomb制御用に適用なIDを付与
-        BombId = BombId >= int.MaxValue ? 1 : BombId + 1;
+        int bombId = GetNextBombId();
 
         var randomPercent = Random.Range(0f, 100f);
         var patternList = FaraBombCreatePatternEnumHelper.GetPattern(_playerBombLevel);
@@ -81,37 +106,19 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
                         bombCommandListModel.Add(new BombCommandModel
                         {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = notePositionEnum.GetValue()
+                            BombId = bombId,
+                            PositionIndex = notePositionEnum.GetValue(),
+                            HitTime = hitTime
                         });
                         selectedPosList.Add(notePositionEnum);
                     }
 
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    EnqueueBombCommands(bombCommandListModel);
                     break;
                 }
             case FaraBombCreatePatternEnum.BombReset:
                 {
-                    if (notePositionEnum.IsTopPosition() || notePositionEnum == NotePositionEnum.CenterLeft)
-                    {
-                        startPos = NotePositionEnum.TopLeft.GetValue();
-                        endPos = NotePositionEnum.TopRight.GetValue();
-                    }
-                    else
-                    {
-                        startPos = NotePositionEnum.BottomLeft.GetValue();
-                        endPos = NotePositionEnum.BottomRight.GetValue();
-                    }
-
-                    for (var i = startPos; i <= endPos; i++)
-                        bombCommandListModel.Add(new BombCommandModel
-                        {
-                            BombId = BombId,
-                            SpawnDelayTime = 0,
-                            PositionIndex = i
-                        });
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    EnqueueBombCommands(CreateResetPatternCommands(bombId, notePositionEnum, hitTime));
                     break;
                 }
             case FaraBombCreatePatternEnum.BombLineSingle:
@@ -126,18 +133,18 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
                         for (var j = 0; j < Config.BombLineCount; j++)
                         {
-
+                            float lineHitTime = hitTime + (BombLineDiffBeat * j * _beatInterval);
                             bombCommandListModel.Add(new BombCommandModel
                             {
-                                BombId = BombId,
-                                SpawnDelayTime = BombLineDiffBeat * j,
-                                PositionIndex = notePositionEnum.GetValue()
+                                BombId = bombId,
+                                PositionIndex = notePositionEnum.GetValue(),
+                                HitTime = lineHitTime
                             });
                         }
                         selectedPosList.Add(notePositionEnum);
                     }
 
-                    FaraBombSystemManager.CommandQueue.Enqueue(bombCommandListModel);
+                    EnqueueBombCommands(bombCommandListModel);
                     break;
                 }
             default:
