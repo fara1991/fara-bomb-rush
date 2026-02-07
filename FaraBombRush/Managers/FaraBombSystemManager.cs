@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -166,11 +166,11 @@ internal class FaraBombSystemManager : MonoBehaviour
             {
                 float songTime = _audioTimeSyncController?.songTime ?? 0f;
                 float timeToHit = firstCommand.HitTime - songTime;
-                
+
                 // マーカーと同様に4拍前でSpawnさせる
                 // 4拍の時間は (60/BPM)*4
                 float lookAheadTime = (60f / _bpm) * 4f;
-                
+
                 if (timeToHit <= lookAheadTime)
                 {
                     if (CommandQueue.TryDequeue(out var readyCommands))

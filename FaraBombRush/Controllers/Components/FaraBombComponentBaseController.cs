@@ -1,4 +1,4 @@
-﻿using FaraBombRush.Configs;
+using FaraBombRush.Configs;
 using UnityEngine;
 
 namespace FaraBombRush.Controllers.Components;

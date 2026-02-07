@@ -1,4 +1,4 @@
-﻿using FaraBombRush.Configs;
+using FaraBombRush.Configs;
 using FaraBombRush.Controllers.Menus;
 using Zenject;
 

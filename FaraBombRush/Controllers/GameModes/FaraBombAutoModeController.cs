@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using FaraBombRush.Enums;
 using FaraBombRush.Managers;
@@ -44,7 +44,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
         // Use a buffer (e.g., 5 beats) to ensure commands are in queue before FaraBombSystemManager needs them
         // SystemManager spawns at 4 beats ahead, so we need at least that much.
         float lookAheadTime = _beatInterval * 5.0f;
-        
+
         float adjustedTime = songTime - SongStartTime;
         int maxBeatIndexToSpawn = (int)((adjustedTime + lookAheadTime) / _beatInterval);
 

@@ -1,4 +1,4 @@
-﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage;
 using FaraBombRush.ViewControllers;
 using HMUI;
 using Zenject;

@@ -1,4 +1,4 @@
-﻿namespace FaraBombRush.Models;
+namespace FaraBombRush.Models;
 
 internal class BombCommandModel
 {

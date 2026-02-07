@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using FaraBombRush.Enums;
 using IPA.Config.Stores;
 

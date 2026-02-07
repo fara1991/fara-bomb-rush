@@ -1,4 +1,4 @@
-﻿using FaraBombRush.UI;
+using FaraBombRush.UI;
 using FaraBombRush.ViewControllers;
 using Zenject;
 
