@@ -1,48 +1,49 @@
-﻿<vertical child-control-height="false">
-    <!-- title -->
-    <horizontal bg="panel-top" pad-left="10" pad-right="10" horizontal-fit="PreferredSize">
-        <text text="Settings" align="Center" font-size="10"/>
-    </horizontal>
+﻿<settings-container>
 
-    <vertical ignore-layout='true' pad-top='20' spacing='0.7'
-              child-control-height='false' child-expand-height='false'>
+  <horizontal bg='panel-top' pad='2'>
+    <text text="~header-common" font-size="4" color="#B060E0" align="Center"/>
+  </horizontal>
 
-        <!-- ゲームモードの設定 -->
-        <horizontal horizontal-fit='PreferredSize' spacing='12'>
-            <list-setting
-                    id="game-mode" text="Play Mode" options="game-mode-options" value="selected-game-mode"
-                    integer-only="false" apply-on-change="true"
-                    hover-hint="Choose a game mode to play."
-            />
-        </horizontal>
+  <dropdown-list-setting
+    text="~language-text"
+    options="language-options"
+    value="selected-language"
+    apply-on-change="true"
+    hover-hint="~language-hint"
+  />
 
-        <!-- プレイヤーレベル設定 -->
-        <horizontal horizontal-fit="PreferredSize" spacing="12">
-            <list-setting
-                    id="player-bomb-level" text="Player Bomb Level" options="player-bomb-level-options"
-                    value="selected-player-bomb-level"
-                    apply-on-change="true"
-                    hover-hint="~player-recommend-level"
-            />
-        </horizontal>
+  <toggle-setting
+    text="~enabled-text"
+    value="selected-is-enabled"
+    apply-on-change="true"
+    hover-hint="~enabled-hint"
+  />
 
-        <!-- ボム当たり判定 -->
-        <horizontal horizontal-fit='PreferredSize' spacing='12'>
-            <checkbox-setting
-                    id="is-bomb-cut-enable" text="Valid Bomb Collision" value="selected-is-bomb-cut-enable"
-                    apply-on-change="true"
-                    hover-hint="Choose bomb collision"
-            />
-        </horizontal>
+  <horizontal bg='panel-top' pad='2'>
+    <text text="~header-bomb" font-size="4" color="#B060E0" align="Center"/>
+  </horizontal>
 
-        <!-- ボム数の設定 -->
-        <horizontal horizontal-fit='PreferredSize' spacing='12'>
-            <increment-setting
-                    id="bomb-count" text="One Shot Bomb Line Count" value="selected-bomb-line-count" min="5" max="10"
-                    increment="1"
-                    integer-only="true" apply-on-change="true"
-                    hover-hint="A row of bombs appearing at once"
-            />
-        </horizontal>
-    </vertical>
-</vertical>
+  <dropdown-list-setting
+    text="~game-mode-text"
+    options="game-mode-options"
+    value="selected-game-mode"
+    apply-on-change="true"
+    hover-hint="~game-mode-hint"
+  />
+
+  <dropdown-list-setting
+    text="~player-level-text"
+    options="player-bomb-level-options"
+    value="selected-player-bomb-level"
+    apply-on-change="true"
+    hover-hint="~player-recommend-level"
+  />
+
+  <toggle-setting
+    text="~bomb-cut-text"
+    value="selected-is-bomb-cut-enable"
+    apply-on-change="true"
+    hover-hint="~bomb-cut-hint"
+  />
+
+</settings-container>

@@ -20,12 +20,7 @@ public class SongPlayCustomInstaller : Installer
 
     public override void InstallBindings()
     {
-        if (_config.GameMode == GameModeEnum.None.ToString()) return;
-
-        // Beat Saber's audio and spawn system
-        Container.Bind<AudioTimeSyncController>().FromResolve();
-        Container.Bind<BeatmapObjectSpawnController.InitData>().FromResolve().AsCached();
-        Container.Bind<IDifficultyBeatmap>().FromResolve().AsCached();
+        if (!_config.IsEnabled) return;
 
         Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()
@@ -47,17 +42,17 @@ public class SongPlayCustomInstaller : Installer
         // Play Mode
         Container.BindInterfacesAndSelfTo<FaraBombGameModeBaseController>().FromNewComponentOnNewGameObject().AsCached()
             .NonLazy();
-        if (_config.GameMode == GameModeEnum.Interactive.ToString())
+        if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Interactive.ToString())
         {
             Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().FromNewComponentOnNewGameObject()
                 .AsCached().NonLazy();
         }
-        else if (_config.GameMode == GameModeEnum.Auto.ToString())
+        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Auto.ToString())
         {
             Container.BindInterfacesAndSelfTo<FaraBombAutoModeController>().FromNewComponentOnNewGameObject().AsCached()
                 .NonLazy();
         }
-        else if (_config.GameMode == GameModeEnum.Battle.ToString())
+        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Battle.ToString())
         {
             // 後で実装
         }

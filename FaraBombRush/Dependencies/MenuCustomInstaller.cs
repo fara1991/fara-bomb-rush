@@ -1,3 +1,4 @@
+using FaraBombRush.Services;
 using FaraBombRush.UI;
 using FaraBombRush.ViewControllers;
 using Zenject;
@@ -11,5 +12,6 @@ public class MenuCustomInstaller : Installer
         Container.Bind<SettingViewController>().FromNewComponentAsViewController().AsSingle();
         Container.BindInterfacesAndSelfTo<SettingsUI>().AsSingle();
         Container.BindInterfacesAndSelfTo<FaraBombRushFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+        Container.Bind<MenuBombPreviewService>().FromNewComponentOnNewGameObject().AsSingle();
     }
 }

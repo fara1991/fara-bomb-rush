@@ -80,7 +80,8 @@ public static class NotePositionEnumHelper
         }
 
         // 一致しないIndexはデフォルト値を返すか、エラーログを出してランダムに
-        Plugin.Logger.Warn($"Invalid position value: {value}. Using random position.");
+        // 6・7 は想定内（位置がない番号）なので警告にはしない
+        Plugin.Logger.Info($"No fixed note position for number {value}. Using random position.");
         return RandomPositionEnum();
     }
 
