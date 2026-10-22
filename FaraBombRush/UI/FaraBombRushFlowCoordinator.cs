@@ -1,5 +1,6 @@
 using BeatSaberMarkupLanguage;
 using FaraBombRush.Configs;
+using FaraBombRush.Models;
 using FaraBombRush.Services;
 using FaraBombRush.ViewControllers;
 using HMUI;
@@ -32,16 +33,23 @@ internal class FaraBombRushFlowCoordinator : FlowCoordinator
         if (firstActivation)
         {
             showBackButton = true;
-            SetTitle("FaraBombRush Settings");
             ProvideInitialViewControllers(_settingViewController);
         }
+
+        // 言語を変えたあとに開き直しても、タイトルが新しい言語になるように毎回設定する
+        SetTitle(UiText.Pick(_config.Language, "FaraBombRush Settings", "FaraBombRush の設定"));
 
         _previewService.UpdateEnabled(_config.IsEnabled);
     }
 
+    protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
+        // 戻るボタン以外（別経路で閉じる場合など）でも、プレビューの爆弾を片付ける
+        _previewService.Hide();
+    }
+
     protected override void BackButtonWasPressed(ViewController viewController)
     {
-        _previewService.Hide();
         base.BackButtonWasPressed(viewController);
         _mainFlowCoordinator.DismissFlowCoordinator(this);
     }
