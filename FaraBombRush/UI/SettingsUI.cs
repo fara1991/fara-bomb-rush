@@ -77,6 +77,9 @@ internal class SettingsUI : IInitializable, IDisposable
 
     private void ApplyText()
     {
+        // メニューのシングルトンが無い（まだ生成されていない、または破棄後）なら何もしない
+        if (!MenuButtons.IsSingletonAvailable) return;
+
         // MenuButton には説明文を後から変える手段がないため、作り直して差し替える
         MenuButtons.instance.UnregisterButton(_menuButton);
         _menuButton = CreateButton();

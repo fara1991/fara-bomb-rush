@@ -44,6 +44,8 @@ internal class FaraBombRushFlowCoordinator : FlowCoordinator
 
     protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
     {
+        base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+
         // 戻るボタン以外（別経路で閉じる場合など）でも、プレビューの爆弾を片付ける
         _previewService.Hide();
     }

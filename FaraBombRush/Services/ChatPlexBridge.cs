@@ -13,20 +13,21 @@ internal static class ChatPlexBridge
 {
     private static Action<string, string> _onMessage;
 
-    /// <summary>チャット受信を開始する。onMessage には（送信元の表示名, メッセージ本文）が渡る。</summary>
+    /// <summary>チャット受信を開始する。onMessage には（送信元の表示名, メッセージ本文）が渡る。失敗したら例外を投げる。</summary>
     public static void Acquire(Action<string, string> onMessage)
     {
-        _onMessage = onMessage;
         CP_SDK.Chat.Service.Acquire();
         try
         {
+            _onMessage = onMessage;
             CP_SDK.Chat.Service.Multiplexer.OnTextMessageReceived += OnTextMessageReceived;
         }
-        catch
+        catch (Exception)
         {
-            // 購読に失敗したら、取得したサービスを戻してから例外を渡す
-            CP_SDK.Chat.Service.Release();
+            // 購読に失敗したら、受け取る相手を外し、取得したサービスを戻してから元の例外を投げ直す。
+            // 戻す処理の例外で元の例外を隠さない
             _onMessage = null;
+            TryReleaseService();
             throw;
         }
     }
@@ -42,6 +43,18 @@ internal static class ChatPlexBridge
         {
             _onMessage = null;
             CP_SDK.Chat.Service.Release();
+        }
+    }
+
+    private static void TryReleaseService()
+    {
+        try
+        {
+            CP_SDK.Chat.Service.Release();
+        }
+        catch (Exception)
+        {
+            // 元の例外を優先する（ここでは何もしない）
         }
     }
 

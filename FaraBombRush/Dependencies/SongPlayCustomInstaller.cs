@@ -42,17 +42,17 @@ public class SongPlayCustomInstaller : Installer
         // Play Mode
         Container.BindInterfacesAndSelfTo<FaraBombGameModeBaseController>().FromNewComponentOnNewGameObject().AsCached()
             .NonLazy();
-        if (_config.GameMode == GameModeEnum.Interactive.ToString())
+        if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Interactive.ToString())
         {
             Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().FromNewComponentOnNewGameObject()
                 .AsCached().NonLazy();
         }
-        else if (_config.GameMode == GameModeEnum.Auto.ToString())
+        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Auto.ToString())
         {
             Container.BindInterfacesAndSelfTo<FaraBombAutoModeController>().FromNewComponentOnNewGameObject().AsCached()
                 .NonLazy();
         }
-        else if (_config.GameMode == GameModeEnum.Battle.ToString())
+        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Battle.ToString())
         {
             // 後で実装
         }

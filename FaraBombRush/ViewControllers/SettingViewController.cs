@@ -124,10 +124,10 @@ internal class SettingViewController : BSMLAutomaticViewController
     [UIValue("selected-game-mode")]
     public string GameMode
     {
-        get => _config.GameMode;
+        get => GameModeEnumHelper.Normalize(_config.GameMode);
         set
         {
-            _config.GameMode = value;
+            _config.GameMode = GameModeEnumHelper.Normalize(value);
             _config.Changed();
         }
     }
