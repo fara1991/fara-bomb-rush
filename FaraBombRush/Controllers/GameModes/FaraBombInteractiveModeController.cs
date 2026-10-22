@@ -77,13 +77,18 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         int bombId = GetNextBombId();
 
         var parts = command.Split(' ');
-        var posIndex = parts.Length == 2
-            ? parts[1]
-            : Random.Range(1, NotePositionEnumList.Count).ToString();
+        NotePositionEnum notePositionEnum;
+        if (parts.Length == 2)
+        {
+            if (!int.TryParse(parts[1], out var posInt)) return;
+            notePositionEnum = NotePositionEnumHelper.FromValue(posInt);
+        }
+        else
+        {
+            // 位置の省略時は、実在する 10 か所から一様に選ぶ（1〜12 の番号を経由すると偏るため）
+            notePositionEnum = NotePositionEnumList[Random.Range(0, NotePositionEnumList.Count)];
+        }
 
-        if (!int.TryParse(posIndex, out var posInt)) return;
-
-        var notePositionEnum = NotePositionEnumHelper.FromValue(posInt);
         var hitTime = GetCurrentSongTime() + (60f / Bpm) * SpawnAheadBeats;
 
         if (command.Contains(LineCommand))
