@@ -4,7 +4,8 @@ Beat Saber mod that spawns bombs during gameplay. Supports Twitch chat commands 
 
 ## Requirements
 
-- Beat Saber 1.29.1
+- Beat Saber 1.29.1 or 1.40.8 (build for each version, see [Building](#building))
+- Twitch chat is read via ChatPlexSDK (BeatSaberPlus must be installed in both 1.29.1 and 1.40.8)
 - [BSIPA](https://github.com/bsmg/BeatSaber-IPA-Reloaded) >= 4.2.0
 
 ## Installation
@@ -52,11 +53,20 @@ Settings are available in the in-game Mod Settings menu.
 
 ### Build
 
+Build with MSBuild (Visual Studio). Pick the Beat Saber version with the `GameVersion` property; the references are taken from `%USERPROFILE%\BSManager\BSInstances\<GameVersion>`.
+
 ```bash
-dotnet build
+# Beat Saber 1.29.1 (default)
+msbuild FaraBombRush/FaraBombRush.csproj -restore -p:Configuration=Release
+
+# Beat Saber 1.40.8
+msbuild FaraBombRush/FaraBombRush.csproj -restore -p:Configuration=Release -p:GameVersion=1.40.8
 ```
 
-The `GameDirectory` property in `FaraBombRush.csproj` must point to your Beat Saber installation path.
+- Output: `FaraBombRush/bin/<Configuration>/<GameVersion>/FaraBombRush.dll`
+- The DLL is copied to that version's `Plugins` folder by BeatSaberModdingTools (add `-p:DisableCopyToGame=True` to skip). `Assets/farabomb.particle` is copied to its `UserData/FaraBombRush` if it is not there yet.
+- `manifest.json` is embedded for 1.29.1 and `manifest.1.40.8.json` for 1.40.8 (different `gameVersion`).
+- Code that differs between versions is wrapped in `#if GAME_1_40_8` / `#else`.
 
 ## License
 
