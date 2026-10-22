@@ -29,13 +29,13 @@ Beat Saber mod that spawns bombs during gameplay. Supports Twitch chat commands 
 | Command | Description |
 |---------|-------------|
 | `!bomb` | Spawn a single bomb at a random position |
-| `!bomb <1-12>` | Spawn a single bomb at a specific position |
+| `!bomb <1-10>` | Spawn a single bomb at a specific position |
 | `!bombline` | Spawn a line of bombs at a random position |
-| `!bombline <1-12>` | Spawn a line of bombs at a specific position |
+| `!bombline <1-10>` | Spawn a line of bombs at a specific position |
 | `!bombreset` | Spawn a reset pattern of bombs |
-| `!bombreset <1-12>` | Spawn a reset pattern at a specific position |
+| `!bombreset <1-10>` | Spawn a reset pattern at a specific position |
 
-Position numbers (`<1-12>`):
+Position numbers (`<1-10>`):
 
 | Number | Position |
 |--------|----------|
@@ -44,17 +44,16 @@ Position numbers (`<1-12>`):
 | 3 | Top middle right |
 | 4 | Top right |
 | 5 | Center left |
-| 6, 7 | No position of their own. A random position is used. |
-| 8 | Center right |
-| 9 | Bottom left |
-| 10 | Bottom middle left |
-| 11 | Bottom middle right |
-| 12 | Bottom right |
+| 6 | Center right |
+| 7 | Bottom left |
+| 8 | Bottom middle left |
+| 9 | Bottom middle right |
+| 10 | Bottom right |
 
-- Without a number, the position is picked at random from 1 to 9, so 10 to 12 are only used when a number is given.
+- Without a number, the position is picked at random from 1 to 10.
 - `!bombline` spawns the number of bombs set by **One Shot Bomb Line Count** (default 5) at the same position, one beat apart.
-- `!bombreset` spawns 4 bombs at the same time across one row. Positions 1 to 5 use the top row, and positions 8 to 12 use the bottom row. Numbers 6 and 7 use the row of the random position they land on.
-- Numbers outside 1 to 12 are ignored.
+- `!bombreset` spawns 4 bombs at the same time across one row. Numbers 1 to 5 use the top row, and numbers 6 to 10 use the bottom row.
+- Numbers outside 1 to 10 (and anything that is not a number) do not spawn a bomb.
 
 ## Settings
 
