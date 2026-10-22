@@ -1,0 +1,67 @@
+name: バグ報告
+description: バグや問題を報告してください
+labels: ["bug"]
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: バグの説明
+      description: 発生している問題について詳しく説明してください
+      placeholder: "例：ボムラッシュ発動時にフレームレートが大幅に低下する"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 再現手順
+      description: 問題を再現するための手順を詳しく記載してください
+      placeholder: |
+        例：
+        1. Beat Saberを起動
+        2. ボムラッシュ条件を満たす
+        3. 大量のボムが生成される
+        4. フレームレートが低下する
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 期待する動作
+      description: 本来どのような動作をするべきかを説明してください
+      placeholder: "例：ボムラッシュ中も安定したフレームレートを維持する"
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 実際の動作
+      description: 実際に何が起こっているかを説明してください
+      placeholder: "例：フレームレートが30fps以下に低下する"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境情報
+      description: 使用している環境について教えてください
+      placeholder: |
+        例：
+        - OS: Windows 11
+        - Beat Saber: 1.29.1
+        - VRヘッドセット: Meta Quest 3 (Link)
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: スクリーンショット
+      description: 問題を示すスクリーンショットがあれば添付してください
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 追加情報
+      description: その他、問題の解決に役立つ情報があれば記載してください
+    validations:
+      required: false
