@@ -56,9 +56,9 @@ Position numbers (`<1-12>`):
 
 Open the **Fara Bomb Rush** button in the main menu to change these settings.
 
-- **Language** - English / Japanese. Saved, but not applied to the on-screen text yet.
+- **Language** - English / Japanese. Changes the settings screen and the menu button text. Defaults to English; unknown values are treated as English.
 - **Enabled** - Enable or disable the mod. The menu bomb preview follows this setting.
-- **Play Mode** - Game mode (Interactive / Auto / Battle). Note: the settings view currently sets it to Interactive when it is created, so the choice is not kept reliably yet.
+- **Play Mode** - Game mode (Interactive / Auto / Battle). The choice is saved. Battle is not implemented yet.
 - **Player Bomb Level** - Difficulty level for auto mode (Beginner / Easy / Normal / Hard / Expert / ExpertPlus / Lawless)
 - **Valid Bomb Collision** - Enable/disable bomb hit detection
 
