@@ -29,31 +29,26 @@ Beat Saber mod that spawns bombs during gameplay. Supports Twitch chat commands 
 | Command | Description |
 |---------|-------------|
 | `!bomb` | Spawn a single bomb at a random position |
-| `!bomb <1-10>` | Spawn a single bomb at a specific position |
+| `!bomb <1-12>` | Spawn a single bomb at a specific position |
 | `!bombline` | Spawn a line of bombs at a random position |
-| `!bombline <1-10>` | Spawn a line of bombs at a specific position |
-| `!bombreset` | Spawn a reset pattern of bombs |
-| `!bombreset <1-10>` | Spawn a reset pattern at a specific position |
+| `!bombline <1-12>` | Spawn a line of bombs at a specific position |
+| `!bombreset` | Spawn a reset pattern of bombs at a random position |
+| `!bombreset <1-12>` | Spawn a reset pattern at a specific position |
 
-Position numbers (`<1-10>`):
+Position numbers (`<1-12>`):
 
 | Number | Position |
 |--------|----------|
-| 1 | Top left |
-| 2 | Top middle left |
-| 3 | Top middle right |
-| 4 | Top right |
+| 1 to 4 | Top row, from the left (top left, top middle left, top middle right, top right) |
 | 5 | Center left |
-| 6 | Center right |
-| 7 | Bottom left |
-| 8 | Bottom middle left |
-| 9 | Bottom middle right |
-| 10 | Bottom right |
+| 6, 7 | No fixed position (between the note positions). A random position is used. |
+| 8 | Center right |
+| 9 to 12 | Bottom row, from the left (bottom left, bottom middle left, bottom middle right, bottom right) |
 
-- Without a number, the position is picked at random from 1 to 10.
+- Without a number, the position is picked at random, uniformly from the 10 positions above.
 - `!bombline` spawns the number of bombs set by **One Shot Bomb Line Count** (default 5) at the same position, one beat apart.
-- `!bombreset` spawns 4 bombs at the same time across one row. Numbers 1 to 5 use the top row, and numbers 6 to 10 use the bottom row.
-- Numbers outside 1 to 10 (and anything that is not a number) do not spawn a bomb.
+- `!bombreset` spawns 4 bombs at the same time across one row. Position 5 and the top positions reset the **top row**. Position 8 and the bottom positions reset the **bottom row**. For 6, 7 or no number, the row depends on the random position.
+- Numbers outside 1 to 12 (for example `0` or `13`) and anything that is not a number do not spawn a bomb.
 
 ## Settings
 
