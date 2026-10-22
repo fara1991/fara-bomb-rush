@@ -83,6 +83,9 @@
         <Compile Include="Exceptions\FaraBombException.cs"/>
         <Compile Include="Managers\FaraBombSystemManager.cs"/>
         <Compile Include="Services\MenuBombPreviewService.cs"/>
+        <Compile Include="Services\ChatPlexBridge.cs"/>
+        <Compile Include="Models\BombChatCommandParser.cs"/>
+        <Compile Include="Models\UiText.cs"/>
         <Compile Include="Models\BombCommandModel.cs"/>
         <Compile Include="Models\FaraBombComponentModel.cs"/>
         <Compile Include="Models\FaraBombManagementPoolModel.cs"/>

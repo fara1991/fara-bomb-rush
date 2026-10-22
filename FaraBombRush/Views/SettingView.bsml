@@ -1,38 +1,38 @@
-<settings-container>
+﻿<settings-container>
 
   <horizontal bg='panel-top' pad='2'>
-    <text text="Common" font-size="4" color="#B060E0" align="Center"/>
+    <text text="~header-common" font-size="4" color="#B060E0" align="Center"/>
   </horizontal>
 
   <dropdown-list-setting
-    text="Language"
+    text="~language-text"
     options="language-options"
     value="selected-language"
     apply-on-change="true"
-    hover-hint="Choose display language"
+    hover-hint="~language-hint"
   />
 
   <toggle-setting
-    text="Enabled"
+    text="~enabled-text"
     value="selected-is-enabled"
     apply-on-change="true"
-    hover-hint="Enable or disable Fara Bomb Rush"
+    hover-hint="~enabled-hint"
   />
 
   <horizontal bg='panel-top' pad='2'>
-    <text text="Bomb Settings" font-size="4" color="#B060E0" align="Center"/>
+    <text text="~header-bomb" font-size="4" color="#B060E0" align="Center"/>
   </horizontal>
 
   <dropdown-list-setting
-    text="Play Mode"
+    text="~game-mode-text"
     options="game-mode-options"
     value="selected-game-mode"
     apply-on-change="true"
-    hover-hint="Choose a game mode to play."
+    hover-hint="~game-mode-hint"
   />
 
   <dropdown-list-setting
-    text="Player Bomb Level"
+    text="~player-level-text"
     options="player-bomb-level-options"
     value="selected-player-bomb-level"
     apply-on-change="true"
@@ -40,11 +40,10 @@
   />
 
   <toggle-setting
-    text="Valid Bomb Collision"
+    text="~bomb-cut-text"
     value="selected-is-bomb-cut-enable"
     apply-on-change="true"
-    hover-hint="Choose bomb collision"
+    hover-hint="~bomb-cut-hint"
   />
-
 
 </settings-container>
