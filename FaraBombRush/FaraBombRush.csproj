@@ -208,6 +208,7 @@
     <ItemGroup>
         <Reference Include="ChatPlexSDK_BS">
             <HintPath>$(GameDirectory)\Plugins\ChatPlexSDK_BS.dll</HintPath>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
     <!-- 1.40.x では FlowCoordinator / ViewController が BeatSaber.ViewSystem.dll に、BeatmapLevel が DataModels.dll に移った -->
@@ -240,7 +241,8 @@
         <PropertyGroup>
             <GameReferencePath>$(GameDirectory)\Beat Saber_Data\Managed\;$(GameDirectory)\Libs\;$(GameDirectory)\Plugins\</GameReferencePath>
             <ReferencePath>$(GameReferencePath)</ReferencePath>
-            <AssemblySearchPaths>{CandidateAssemblyFiles};$(GameReferencePath);{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+            <!-- .NET Framework の BCL（mscorlib / System など）は、ゲームの Managed にある Unity 版より {TargetFrameworkDirectory} を優先する -->
+            <AssemblySearchPaths>{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};$(GameReferencePath);{RawFileName}</AssemblySearchPaths>
         </PropertyGroup>
     </Target>
     <!-- Plugins へのコピーは BeatSaberModdingTools.Tasks（BSMT_CopyToPlugins）が GameDirectory の Plugins に行う。
