@@ -78,20 +78,20 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         switch (command.Kind)
         {
             case BombChatCommandKind.Line:
-            {
-                var commands = new List<BombCommandModel>();
-                for (var i = 0; i < 5; i++)
                 {
-                    commands.Add(new BombCommandModel
+                    var commands = new List<BombCommandModel>();
+                    for (var i = 0; i < 5; i++)
                     {
-                        BombId = bombId,
-                        PositionIndex = notePositionEnum.GetValue(),
-                        HitTime = hitTime + (BombLineDiffBeat * i * (60f / Bpm))
-                    });
+                        commands.Add(new BombCommandModel
+                        {
+                            BombId = bombId,
+                            PositionIndex = notePositionEnum.GetValue(),
+                            HitTime = hitTime + (BombLineDiffBeat * i * (60f / Bpm))
+                        });
+                    }
+                    EnqueueBombCommands(commands);
+                    break;
                 }
-                EnqueueBombCommands(commands);
-                break;
-            }
             case BombChatCommandKind.Reset:
                 EnqueueBombCommands(CreateResetPatternCommands(bombId, notePositionEnum, hitTime));
                 break;
