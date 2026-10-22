@@ -22,6 +22,27 @@ public static class NotePositionEnumHelper
 {
     private const float DefaultPlayerHeight = 140f;
 
+    /// <summary>チャットコマンドで指定できる位置番号の最小値。</summary>
+    public const int MinPositionNumber = 1;
+
+    /// <summary>チャットコマンドで指定できる位置番号の最大値（ノーツの 12 か所から中央 2 か所を除いた 10 か所）。</summary>
+    public const int MaxPositionNumber = 10;
+
+    /// <summary>位置番号 1〜10 に対応する位置（インデックス = 番号 - 1）。上段 1〜4、中段 5（左）と 6（右）、下段 7〜10。</summary>
+    private static readonly NotePositionEnum[] PositionByNumber =
+    [
+        NotePositionEnum.TopLeft,
+        NotePositionEnum.TopMiddleLeft,
+        NotePositionEnum.TopMiddleRight,
+        NotePositionEnum.TopRight,
+        NotePositionEnum.CenterLeft,
+        NotePositionEnum.CenterRight,
+        NotePositionEnum.BottomLeft,
+        NotePositionEnum.BottomMiddleLeft,
+        NotePositionEnum.BottomMiddleRight,
+        NotePositionEnum.BottomRight
+    ];
+
     private static readonly Vector2[] PositionCoordinates =
     [
         new(-0.9f, 1.7f), // TopLeft
@@ -82,6 +103,22 @@ public static class NotePositionEnumHelper
         // 一致しないIndexはデフォルト値を返すか、エラーログを出してランダムに
         Plugin.Logger.Warn($"Invalid position value: {value}. Using random position.");
         return RandomPositionEnum();
+    }
+
+    /// <summary>位置番号（1〜10）が有効かどうか。</summary>
+    public static bool IsValidPositionNumber(int number) => number >= MinPositionNumber && number <= MaxPositionNumber;
+
+    /// <summary>位置番号（1〜10）を位置に変換する。範囲外は false を返し、position は既定値になる。</summary>
+    public static bool TryFromNumber(int number, out NotePositionEnum position)
+    {
+        if (IsValidPositionNumber(number))
+        {
+            position = PositionByNumber[number - MinPositionNumber];
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 
     public static NotePositionEnum FromIndex(int index)

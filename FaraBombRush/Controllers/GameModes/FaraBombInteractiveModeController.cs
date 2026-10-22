@@ -61,7 +61,7 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         if (!chat.Contains(BaseCommand) && !chat.Contains(LineCommand) && !chat.Contains(ResetCommand))
             return false;
         if (chatSplit.Length != 2 || !int.TryParse(chatSplit[1], out var pos)) return true;
-        return 1 <= pos && pos <= NotePositionEnum.BottomRight.GetValue() + 1;
+        return NotePositionEnumHelper.IsValidPositionNumber(pos);
     }
 
     protected override void BombPush()
@@ -80,10 +80,10 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
         var replaceChatList = command.Split(' ');
         var posIndex = replaceChatList.Length == 2
             ? replaceChatList[1]
-            : Random.Range(1, NotePositionEnumList.Count).ToString();
+            : Random.Range(NotePositionEnumHelper.MinPositionNumber, NotePositionEnumHelper.MaxPositionNumber + 1).ToString();
 
         if (!int.TryParse(posIndex, out var posInt)) return;
-        var notePositionEnum = NotePositionEnumHelper.FromValue(posInt);
+        if (!NotePositionEnumHelper.TryFromNumber(posInt, out var notePositionEnum)) return;
 
         var hitTime = GetCurrentSongTime() + (60f / Bpm) * 4.5f; // Spawn slightly ahead of the spawn timing (4 beats)
 
