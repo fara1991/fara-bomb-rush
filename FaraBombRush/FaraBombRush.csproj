@@ -15,7 +15,9 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>portable</DebugType>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
-        <GameDirectory>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber</GameDirectory>
+        <!-- 対象の Beat Saber のバージョン。-p:GameVersion=1.40.8 で 1.40.8 向けにビルドする（既定は 1.29.1） -->
+        <GameVersion Condition=" '$(GameVersion)' == '' ">1.29.1</GameVersion>
+        <GameDirectory>$(USERPROFILE)\BSManager\BSInstances\$(GameVersion)</GameDirectory>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
         <!--<PathMap>$(AppOutputBase)=X:\$(AssemblyName)\</PathMap>-->
         <ErrorReport>prompt</ErrorReport>
@@ -27,14 +29,23 @@
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
+        <OutputPath>bin\Debug\$(GameVersion)\</OutputPath>
+        <IntermediateOutputPath>obj\Debug\$(GameVersion)\</IntermediateOutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
+        <OutputPath>bin\Release\$(GameVersion)\</OutputPath>
+        <IntermediateOutputPath>obj\Release\$(GameVersion)\</IntermediateOutputPath>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <!-- ゲームのバージョンごとの条件付きコンパイル用シンボル（#if GAME_1_40_8 など） -->
+    <PropertyGroup Condition=" '$(GameVersion)' == '1.29.1' ">
+        <DefineConstants>$(DefineConstants);GAME_1_29_1</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(GameVersion)' == '1.40.8' ">
+        <DefineConstants>$(DefineConstants);GAME_1_40_8</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
         <DisableCopyToPlugins>True</DisableCopyToPlugins>
@@ -71,6 +82,7 @@
         <Compile Include="Enums\SaberObjectEnum.cs"/>
         <Compile Include="Exceptions\FaraBombException.cs"/>
         <Compile Include="Managers\FaraBombSystemManager.cs"/>
+        <Compile Include="Services\MenuBombPreviewService.cs"/>
         <Compile Include="Models\BombCommandModel.cs"/>
         <Compile Include="Models\FaraBombComponentModel.cs"/>
         <Compile Include="Models\FaraBombManagementPoolModel.cs"/>
@@ -85,7 +97,13 @@
         <Compile Include="ViewControllers\SettingViewController.cs"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="manifest.json"/>
+        <!-- manifest.json は 1.29.1 用、manifest.1.40.8.json は 1.40.8 用（gameVersion が違う）。どちらも FaraBombRush.manifest.json として埋め込む -->
+        <EmbeddedResource Include="manifest.json" Condition=" '$(GameVersion)' != '1.40.8' ">
+            <LogicalName>FaraBombRush.manifest.json</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="manifest.1.40.8.json" Condition=" '$(GameVersion)' == '1.40.8' ">
+            <LogicalName>FaraBombRush.manifest.json</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <None Include="Assets\farabomb.particle"/>
@@ -118,17 +136,6 @@
         </Reference>
         <Reference Include="BS_Utils">
             <HintPath>$(GameDirectory)\Plugins\BS_Utils.dll</HintPath>
-        </Reference>
-        <Reference Include="CatCore">
-            <HintPath>$(GameDirectory)\Libs\CatCore.dll</HintPath>
-        </Reference>
-        <Reference Include="ChatCore">
-            <HintPath>$(GameDirectory)\Plugins\ChatCore.dll</HintPath>
-        </Reference>
-        <Reference Include="ChatCore, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
-            <Private>False</Private>
-            <HintPath>$(GameDirectory)\Libs\ChatCore.dll</HintPath>
-            <SpecificVersion>False</SpecificVersion>
         </Reference>
         <Reference Include="HMLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"/>
         <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -197,6 +204,23 @@
             <SpecificVersion>False</SpecificVersion>
         </Reference>
     </ItemGroup>
+    <!-- チャット: 1.29.1・1.40.8 とも ChatPlexSDK（BeatSaberPlus）を使う -->
+    <ItemGroup>
+        <Reference Include="ChatPlexSDK_BS">
+            <HintPath>$(GameDirectory)\Plugins\ChatPlexSDK_BS.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+    <!-- 1.40.x では FlowCoordinator / ViewController が BeatSaber.ViewSystem.dll に、BeatmapLevel が DataModels.dll に移った -->
+    <ItemGroup Condition=" '$(GameVersion)' == '1.40.8' ">
+        <Reference Include="BeatSaber.ViewSystem">
+            <HintPath>$(GameDirectory)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="DataModels">
+            <HintPath>$(GameDirectory)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Views\SettingView.bsml"/>
     </ItemGroup>
@@ -205,11 +229,21 @@
       <Content Include="Managers\test.log" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
-    <Target Name="CopyToBSManager" AfterTargets="Build">
-        <PropertyGroup>
-            <BSManagerPluginsDir>$(USERPROFILE)\BSManager\BSInstances\1.29.1\Plugins</BSManagerPluginsDir>
-        </PropertyGroup>
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(BSManagerPluginsDir)"/>
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(BSManagerPluginsDir)"/>
+    <!-- Mod が実行時に UserData\FaraBombRush\farabomb.particle を読み込むので、ビルドしたゲームのバージョンの UserData に入れておく
+         （1.40.8 にはこのフォルダが無く、そのままでは爆弾の見た目が読み込めない）。すでにあれば上書きしない -->
+    <Target Name="CopyAssetBundleToUserData" AfterTargets="Build" Condition=" '$(DisableCopyToGame)' != 'True' And Exists('$(GameDirectory)') ">
+        <Copy SourceFiles="Assets\farabomb.particle" DestinationFolder="$(GameDirectory)\UserData\FaraBombRush" SkipUnchangedFiles="true" Condition="!Exists('$(GameDirectory)\UserData\FaraBombRush\farabomb.particle')"/>
     </Target>
+    <!-- .csproj.user の ReferencePath（1.29.1 などの固定パス）は csproj 本体より後に評価されて優先されてしまうため、
+         参照を解決する直前に、検索パスを GameVersion のフォルダ（Managed / Libs / Plugins）に差し替える -->
+    <Target Name="UseGameVersionReferencePath" BeforeTargets="ResolveAssemblyReferences">
+        <PropertyGroup>
+            <GameReferencePath>$(GameDirectory)\Beat Saber_Data\Managed\;$(GameDirectory)\Libs\;$(GameDirectory)\Plugins\</GameReferencePath>
+            <ReferencePath>$(GameReferencePath)</ReferencePath>
+            <AssemblySearchPaths>{CandidateAssemblyFiles};$(GameReferencePath);{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+        </PropertyGroup>
+    </Target>
+    <!-- Plugins へのコピーは BeatSaberModdingTools.Tasks（BSMT_CopyToPlugins）が GameDirectory の Plugins に行う。
+         以前はここで 1.29.1 と 1.40.8 の両方にコピーしていたため、1.29.1 用の DLL が 1.40.8 に入って起動エラーになった。
+         コピーしたくないときは -p:DisableCopyToGame=True を付けてビルドする -->
 </Project>

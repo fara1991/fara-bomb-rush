@@ -80,7 +80,12 @@ internal class FaraBombSystemManager : MonoBehaviour
         PluginConfig config,
         AudioTimeSyncController audioTimeSyncController,
         [InjectOptional] BeatmapObjectSpawnController.InitData spawnInitData,
+#if GAME_1_40_8
+        // 1.40 では IDifficultyBeatmap がなくなり、曲の情報は GameplayCoreSceneSetupData.beatmapLevel から取る
+        [InjectOptional] GameplayCoreSceneSetupData sceneSetupData)
+#else
         [InjectOptional] IDifficultyBeatmap difficultyBeatmap)
+#endif
     {
         _config = config;
         _audioTimeSyncController = audioTimeSyncController;
@@ -93,11 +98,19 @@ internal class FaraBombSystemManager : MonoBehaviour
         }
 
         // Get BPM from beatmap
+#if GAME_1_40_8
+        if (sceneSetupData?.beatmapLevel != null)
+        {
+            float bpm = sceneSetupData.beatmapLevel.beatsPerMinute;
+            _bpm = bpm > 0 ? bpm : 120f;
+        }
+#else
         if (difficultyBeatmap?.level != null)
         {
             float bpm = difficultyBeatmap.level.beatsPerMinute;
             _bpm = bpm > 0 ? bpm : 120f;
         }
+#endif
     }
 
     private void InitializeComponents()

@@ -22,12 +22,30 @@ internal class LoadSteamController : MonoBehaviour
         StartCoroutine(LoadSteamDataCoroutine());
     }
 
+    private static bool IsSteamInitialized()
+    {
+#if GAME_1_40_8
+        // 1.40 の SteamManager は静的な Initialized を持たない（インスタンスの isInitialised だけ）ので、Steamworks.NET で確認する。
+        // Steam の初期化前に呼ぶと InvalidOperationException になる
+        try
+        {
+            return SteamUser.GetSteamID().IsValid();
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+#else
+        return SteamManager.Initialized;
+#endif
+    }
+
     private IEnumerator LoadSteamDataCoroutine()
     {
         var retryCount = 0;
 
         // Steam初期化を待つ
-        while (!SteamManager.Initialized && retryCount < MaxRetryCount)
+        while (!IsSteamInitialized() && retryCount < MaxRetryCount)
         {
             Plugin.Logger.Info($"Waiting for Steam initialization... Attempt {retryCount + 1}");
             yield return new WaitForSeconds(RetryInterval);
@@ -36,7 +54,7 @@ internal class LoadSteamController : MonoBehaviour
 
         try
         {
-            if (!SteamManager.Initialized)
+            if (!IsSteamInitialized())
             {
                 throw new FaraBombException("Steam initialization failed", ErrorCodeEnum.LoadSteamError);
             }
