@@ -5,7 +5,7 @@ Beat Saber mod that spawns bombs during gameplay. Supports Twitch chat commands 
 ## Requirements
 
 - Beat Saber 1.29.1 or 1.40.8 (build for each version, see [Building](#building))
-- Twitch chat is read via ChatPlexSDK (BeatSaberPlus must be installed in both 1.29.1 and 1.40.8)
+- BeatSaberPlus (provides ChatPlexSDK) is a soft dependency: Twitch chat commands need it. Without it, chat is disabled (expected; not verified in game). Install it for both 1.29.1 and 1.40.8.
 - [BSIPA](https://github.com/bsmg/BeatSaber-IPA-Reloaded) >= 4.2.0
 
 ## Installation
