@@ -9,9 +9,10 @@ namespace FaraBombRush.Configs;
 public class PluginConfig
 {
     // 通常設定
-    public string GameMode { get; set; } = GameModeEnum.None.ToString();
+    public bool IsEnabled { get; set; } = true;
+    public string Language { get; set; } = "English";
+    public string GameMode { get; set; } = GameModeEnum.Interactive.ToString();
     public bool IsBombCutEnable { get; set; } = true;
-    public int BombLineCount { get; set; } = 5;
     public string PlayerBombLevel { get; set; } = FaraBombLevelEnum.Normal.ToString();
 
     // 特殊設定

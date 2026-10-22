@@ -20,7 +20,7 @@ public class SongPlayCustomInstaller : Installer
 
     public override void InstallBindings()
     {
-        if (_config.GameMode == GameModeEnum.None.ToString()) return;
+        if (!_config.IsEnabled) return;
 
         Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()
