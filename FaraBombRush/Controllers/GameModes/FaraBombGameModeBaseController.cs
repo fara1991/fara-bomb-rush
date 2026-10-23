@@ -12,8 +12,6 @@ namespace FaraBombRush.Controllers.GameModes;
 
 internal class FaraBombGameModeBaseController : MonoBehaviour
 {
-    protected const float BombLineDiffBeat = 1.0f;
-
     protected readonly List<NotePositionEnum> NotePositionEnumList =
         Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
 
@@ -121,6 +119,13 @@ internal class FaraBombGameModeBaseController : MonoBehaviour
             });
         }
         return commands;
+    }
+
+    /// <summary>ライン内の隣り合うボムの HitTime の差（秒）。間隔は距離（BombLineTiming.SpacingMeters）で決める。</summary>
+    protected float GetBombLineSpacingSeconds()
+    {
+        var timeScale = AudioTimeSyncController != null ? AudioTimeSyncController.timeScale : 1f;
+        return BombLineTiming.SpacingSeconds(Njs, timeScale);
     }
 
     protected float GetCurrentSongTime()

@@ -74,6 +74,7 @@
         <Compile Include="Enums\FaraBombCreatePatternEnum.cs"/>
         <Compile Include="Enums\FaraBombExplosionPhaseEnum.cs"/>
         <Compile Include="Enums\FaraBombLevelEnum.cs"/>
+        <Compile Include="Enums\FaraBombLevelEnumHelper.cs"/>
         <Compile Include="Enums\FaraBombStateEnum.cs"/>
         <Compile Include="Enums\FaraBombNameEnum.cs"/>
         <Compile Include="Enums\GameModeEnum.cs"/>
@@ -89,7 +90,9 @@
         <Compile Include="Models\BombCommandModel.cs"/>
         <Compile Include="Models\FaraBombComponentModel.cs"/>
         <Compile Include="Models\FaraBombManagementPoolModel.cs"/>
-        <Compile Include="Models\ScoreSaberModel.cs"/>
+        <Compile Include="Models\ScoreSaberPlayerParser.cs"/>
+        <Compile Include="Models\BombLineTiming.cs"/>
+        <Compile Include="Models\BombLevelCalculator.cs"/>
         <Compile Include="Patches\GamePausePatch.cs"/>
         <Compile Include="Plugin.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
