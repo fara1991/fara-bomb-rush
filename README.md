@@ -93,7 +93,7 @@ Releases are built on a local machine, not on GitHub Actions: the build needs th
 
 ### Prerequisites
 
-- .NET SDK (`dotnet`), Windows PowerShell 5.1 or later
+- .NET SDK (`dotnet`), Windows PowerShell 5.1 or later (the default execution policy blocks scripts, so run it with `-ExecutionPolicy Bypass` as below)
 - Reference DLLs for both versions in `%USERPROFILE%\BSManager\BSInstances\1.29.1` and `%USERPROFILE%\BSManager\BSInstances\1.40.8` (install them with BSManager)
 - For publishing: [GitHub CLI](https://cli.github.com/) (`gh auth login`) and push access to this repository
 
