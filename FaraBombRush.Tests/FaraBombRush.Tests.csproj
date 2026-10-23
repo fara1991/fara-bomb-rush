@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ゲームの DLL に依存しない純粋なロジックだけを、ソースをリンクしてテストする -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\FaraBombRush\Models\BombChatCommandParser.cs" Link="Linked\BombChatCommandParser.cs" />
+    <Compile Include="..\FaraBombRush\Models\BombLineTiming.cs" Link="Linked\BombLineTiming.cs" />
+    <Compile Include="..\FaraBombRush\Models\BombLevelCalculator.cs" Link="Linked\BombLevelCalculator.cs" />
+    <Compile Include="..\FaraBombRush\Models\ScoreSaberPlayerParser.cs" Link="Linked\ScoreSaberPlayerParser.cs" />
+    <Compile Include="..\FaraBombRush\Enums\FaraBombLevelEnum.cs" Link="Linked\FaraBombLevelEnum.cs" />
+    <Compile Include="..\FaraBombRush\Enums\GameModeEnum.cs" Link="Linked\GameModeEnum.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+</Project>

@@ -12,8 +12,6 @@ namespace FaraBombRush.Controllers.GameModes;
 
 internal class FaraBombGameModeBaseController : MonoBehaviour
 {
-    protected const float BombLineDiffBeat = 1.0f;
-
     protected readonly List<NotePositionEnum> NotePositionEnumList =
         Enum.GetValues(typeof(NotePositionEnum)).Cast<NotePositionEnum>().ToList();
 
@@ -33,7 +31,12 @@ internal class FaraBombGameModeBaseController : MonoBehaviour
         PluginConfig config,
         AudioTimeSyncController audioTimeSyncController,
         [InjectOptional] BeatmapObjectSpawnController.InitData spawnInitData,
+#if GAME_1_40_8
+        // 1.40 では IDifficultyBeatmap がなくなり、曲の情報は GameplayCoreSceneSetupData.beatmapLevel から取る
+        [InjectOptional] GameplayCoreSceneSetupData sceneSetupData)
+#else
         [InjectOptional] IDifficultyBeatmap difficultyBeatmap)
+#endif
     {
         Config = config;
         AudioTimeSyncController = audioTimeSyncController;
@@ -46,11 +49,19 @@ internal class FaraBombGameModeBaseController : MonoBehaviour
         }
 
         // Get BPM from beatmap
+#if GAME_1_40_8
+        if (sceneSetupData?.beatmapLevel != null)
+        {
+            float bpm = sceneSetupData.beatmapLevel.beatsPerMinute;
+            Bpm = bpm > 0 ? bpm : 120f;
+        }
+#else
         if (difficultyBeatmap?.level != null)
         {
             float bpm = difficultyBeatmap.level.beatsPerMinute;
             Bpm = bpm > 0 ? bpm : 120f;
         }
+#endif
     }
 
     protected virtual void BombPush()
@@ -108,6 +119,13 @@ internal class FaraBombGameModeBaseController : MonoBehaviour
             });
         }
         return commands;
+    }
+
+    /// <summary>ライン内の隣り合うボムの HitTime の差（秒）。間隔は距離（BombLineTiming.SpacingMeters）で決める。</summary>
+    protected float GetBombLineSpacingSeconds()
+    {
+        var timeScale = AudioTimeSyncController != null ? AudioTimeSyncController.timeScale : 1f;
+        return BombLineTiming.SpacingSeconds(Njs, timeScale);
     }
 
     protected float GetCurrentSongTime()

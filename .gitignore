@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 
 # Build release output
 ReleaseFiles/
+
+# release.ps1 output
+/dist/

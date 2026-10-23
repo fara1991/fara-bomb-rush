@@ -17,7 +17,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
     private void Start()
     {
         _playerBombLevel = FaraBombLevelEnumHelper.GetLevelIndex(Config.PlayerBombLevel);
-        _beatInterval = 60f / Bpm; // Calculate beat interval from BPM
+        _beatInterval = Bpm > 0 ? 60f / Bpm : 0.5f;
     }
 
     private void Update()
@@ -125,15 +125,16 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             case FaraBombCreatePatternEnum.BombLineDouble:
             case FaraBombCreatePatternEnum.BombLineTriple:
                 {
+                    var lineSpacingSeconds = GetBombLineSpacingSeconds();
                     endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
                     for (var i = startPos; i < endPos; i++)
                     {
                         while (selectedPosList.Contains(notePositionEnum))
                             notePositionEnum = NotePositionEnumHelper.RandomPositionEnum();
 
-                        for (var j = 0; j < Config.BombLineCount; j++)
+                        for (var j = 0; j < 5; j++)
                         {
-                            float lineHitTime = hitTime + (BombLineDiffBeat * j * _beatInterval);
+                            float lineHitTime = hitTime + (lineSpacingSeconds * j);
                             bombCommandListModel.Add(new BombCommandModel
                             {
                                 BombId = bombId,
@@ -148,7 +149,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
                     break;
                 }
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(pattern), pattern, "Unhandled bomb pattern");
         }
     }
 }
