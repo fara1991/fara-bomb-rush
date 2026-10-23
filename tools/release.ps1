@@ -20,8 +20,8 @@
   Allow -Publish from a branch other than master (not recommended).
 
 .EXAMPLE
-  .\tools\release.ps1 1.1.0            # dry run
-  .\tools\release.ps1 1.1.0 -Publish   # tag v1.1.0 + GitHub release
+  powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0            # dry run
+  powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0 -Publish   # tag v1.1.0 + GitHub release
 #>
 [CmdletBinding()]
 param(
@@ -237,7 +237,7 @@ if (-not $Publish) {
     Write-Host 'Dry run finished. Nothing was tagged or published.' -ForegroundColor Green
     Write-Host 'Zips:' -ForegroundColor Green
     $zips | ForEach-Object { Write-Host "  $_" }
-    Write-Host "To publish: .\tools\release.ps1 $Version -Publish"
+    Write-Host "To publish: powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 $Version -Publish"
     return
 }
 

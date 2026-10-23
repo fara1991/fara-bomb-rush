@@ -103,13 +103,13 @@ Releases are built on a local machine, not on GitHub Actions: the build needs th
 2. On `master`, dry run first. It builds both versions, checks that the versions match, makes the zips under `dist\` and lists their contents. Nothing is tagged or published.
 
    ```powershell
-   .\tools\release.ps1 1.1.0
+   powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0
    ```
 
 3. Publish. This creates and pushes the tag `v1.1.0` and runs `gh release create` with both zips and generated release notes (commits since the previous tag).
 
    ```powershell
-   .\tools\release.ps1 1.1.0 -Publish
+   powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0 -Publish
    ```
 
    `-Publish` stops if the working tree is dirty, the branch is not `master` (override with `-AllowNonMaster`), local `master` differs from `origin/master`, or the tag already exists.
