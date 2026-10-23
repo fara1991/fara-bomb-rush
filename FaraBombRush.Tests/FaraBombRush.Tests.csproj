@@ -13,6 +13,7 @@
     <Compile Include="..\FaraBombRush\Models\BombLevelCalculator.cs" Link="Linked\BombLevelCalculator.cs" />
     <Compile Include="..\FaraBombRush\Models\ScoreSaberPlayerParser.cs" Link="Linked\ScoreSaberPlayerParser.cs" />
     <Compile Include="..\FaraBombRush\Enums\FaraBombLevelEnum.cs" Link="Linked\FaraBombLevelEnum.cs" />
+    <Compile Include="..\FaraBombRush\Enums\GameModeEnum.cs" Link="Linked\GameModeEnum.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

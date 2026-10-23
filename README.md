@@ -21,9 +21,13 @@ The mod is enabled or disabled with the **Enabled** setting. The mode is chosen 
 
 | Mode | Description |
 |------|-------------|
-| **Interactive** | Twitch chat viewers spawn bombs via commands |
+| **None** | Does nothing: no bombs are spawned and chat is not read. |
+| **Interactive** | Twitch chat viewers spawn bombs via commands (the default for new installs) |
 | **Auto** | Bombs are generated automatically, synced to the song's BPM |
-| **Battle** | Not implemented yet. Selecting it starts no game mode controller. |
+
+Battle is not implemented and is not offered. If an old setting still says `Battle`, it is treated like **None** (and shown as None in the settings screen).
+
+Updating from 1.0.0: the 1.0.0 default was **None**, and a saved **None** is kept (the mod stays off until you pick another mode). New installs from 1.1.0 start with **Interactive**.
 
 ## Twitch Chat Commands (Interactive Mode)
 
@@ -49,7 +53,8 @@ Position numbers (`<1-12>`):
 - Without a number, the position is picked at random, uniformly from the 10 positions above.
 - `!bombline` spawns 5 bombs at the same position, 1 m apart in the lane (almost touching), regardless of BPM. Auto mode lines use the same spacing.
 - `!bombreset` spawns 4 bombs at the same time across one row. Position 5 (center left) and the top positions reset the **top row**. Position 8 (center right) and the bottom positions reset the **bottom row**. For 6, 7 or no number, the row depends on the random position (top 5 of 10 positions, bottom 5 of 10).
-- Numbers outside 1 to 12 (for example `0` or `13`) and anything that is not a number do not spawn a bomb.
+- Numbers outside 1 to 12 (for example `0` or `13`) and anything that is not a number do not spawn a bomb. `!bombs` and `!bomberman` are not commands. Only ASCII digits count (a full-width `５` is rejected); a leading zero (`05`) is fine.
+- A Twitch reply works: one leading `@name` is skipped (`@name !bomb 5`). Control characters and invisible format characters (for example the ones 7TV adds) are removed before the check, and any run of spaces is fine.
 
 ## Settings
 
@@ -57,7 +62,7 @@ Open the **Fara Bomb Rush** button in the main menu to change these settings.
 
 - **Language** - English / Japanese. Changes the settings screen and the menu button text. Defaults to English; unknown values are treated as English.
 - **Enabled** - Enable or disable the mod. The menu bomb preview follows this setting.
-- **Play Mode** - Game mode (Interactive / Auto / Battle). The choice is saved. Battle is not implemented yet.
+- **Play Mode** - Game mode (None / Interactive / Auto). The choice is saved. None does nothing (no bombs, chat is not read).
 - **Player Bomb Level** - Difficulty level for auto mode (Beginner / Easy / Normal / Hard / Expert / ExpertPlus / Lawless)
 - **Valid Bomb Collision** - Enable/disable bomb hit detection
 
@@ -100,19 +105,19 @@ Releases are built on a local machine, not on GitHub Actions: the build needs th
 ### Steps
 
 1. Set the same version in `FaraBombRush/manifest.json`, `FaraBombRush/manifest.1.40.8.json` and `FaraBombRush/Properties/AssemblyInfo.cs` (`AssemblyVersion` / `AssemblyFileVersion`), and merge it to `master` through `develop`.
-2. On `master`, dry run first. It builds both versions, checks that the versions match, makes the zips under `dist\` and lists their contents. Nothing is tagged or published.
+2. On `master`, dry run first. It runs the unit tests (`FaraBombRush.Tests`, no game DLLs needed; the script stops if one fails), deletes `bin\Release\<game version>`, builds both versions, checks that the versions match, makes the zips under `dist\` and lists their contents. Nothing is tagged or published. If there is no previous tag to compare with, it warns and lists the last 30 commits in the notes instead.
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0
    ```
 
-3. Publish. This creates and pushes the tag `v1.1.0` and runs `gh release create` with both zips and generated release notes (commits since the previous tag).
+3. Publish. This runs `gh release create v1.1.0 --target <commit>` with both zips and generated release notes (commits since the previous tag). GitHub creates the tag `v1.1.0` at that commit together with the release, so nothing is pushed beforehand and a failed run can simply be repeated. If it fails, the script prints the commands to remove a leftover release or tag.
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File .\tools\release.ps1 1.1.0 -Publish
    ```
 
-   `-Publish` stops if the working tree is dirty, the branch is not `master` (override with `-AllowNonMaster`), local `master` differs from `origin/master`, or the tag already exists.
+   `-Publish` stops if the working tree is dirty, the branch is not `master` (override with `-AllowNonMaster`), local `master` differs from `origin/master`, the commit is not on `origin`, or the tag or a release for it already exists.
 
 Output: `dist\FaraBombRush-v1.1.0-BS1.29.1.zip`, `dist\FaraBombRush-v1.1.0-BS1.40.8.zip` and `dist\release-notes-v1.1.0.md`. Each zip has `Plugins/FaraBombRush.dll`, `Plugins/FaraBombRush.pdb` and `UserData/FaraBombRush/farabomb.particle`. The script builds with `-p:DisableCopyToGame=True`, so it does not touch your installed games.
 

@@ -67,7 +67,9 @@ internal class SettingViewController : BSMLAutomaticViewController
     public string GameModeText => L("Play Mode", "プレイモード");
 
     [UIValue("game-mode-hint")]
-    public string GameModeHint => L("Choose a game mode to play", "遊ぶモードを選びます");
+    public string GameModeHint => L(
+        "Choose a game mode to play. None does nothing (no bombs, no chat).",
+        "遊ぶモードを選びます。なし（None）は何もしません（ボムもチャット読み取りもなし）。");
 
     [UIValue("player-level-text")]
     public string PlayerLevelText => L("Player Bomb Level", "プレイヤーのボムレベル");
@@ -117,6 +119,8 @@ internal class SettingViewController : BSMLAutomaticViewController
         NotifyPropertyChanged(nameof(EnabledHint));
         NotifyPropertyChanged(nameof(GameModeText));
         NotifyPropertyChanged(nameof(GameModeHint));
+        NotifyPropertyChanged(nameof(GameModeOptions));
+        NotifyPropertyChanged(nameof(GameMode));
         NotifyPropertyChanged(nameof(PlayerLevelText));
         NotifyPropertyChanged(nameof(BombCutText));
         NotifyPropertyChanged(nameof(BombCutHint));
@@ -156,12 +160,30 @@ internal class SettingViewController : BSMLAutomaticViewController
     }
 
     [UIValue("game-mode-options")]
-    public List<object> GameModeOptions => Enum.GetNames(typeof(GameModeEnum)).ToList<object>();
+    public List<object> GameModeOptions => GameModeEnumHelper.SelectableNames.Cast<object>().ToList();
+
+    // 選択肢の保存値（None / Interactive / Auto）は変えず、表示だけ言語に合わせる
+    [UIAction("game-mode-format")]
+    public string FormatGameMode(object value)
+    {
+        switch (value as string)
+        {
+            case nameof(GameModeEnum.None):
+                return L("None (do nothing)", "なし（何もしない）");
+            case nameof(GameModeEnum.Interactive):
+                return L("Interactive (chat)", "Interactive（チャット）");
+            case nameof(GameModeEnum.Auto):
+                return L("Auto", "Auto（自動）");
+            default:
+                return value?.ToString() ?? string.Empty;
+        }
+    }
 
     [UIValue("selected-game-mode")]
     public string GameMode
     {
-        get => GameModeEnumHelper.Normalize(_config.GameMode);
+        // 設定に未実装の Battle が残っていても、画面には「なし」として見せる（動作も何もしない）
+        get => GameModeEnumHelper.ToSelectable(_config.GameMode);
         set
         {
             _config.GameMode = GameModeEnumHelper.Normalize(value);

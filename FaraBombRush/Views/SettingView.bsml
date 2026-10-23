@@ -27,6 +27,7 @@
     text="~game-mode-text"
     options="game-mode-options"
     value="selected-game-mode"
+    formatter="game-mode-format"
     apply-on-change="true"
     hover-hint="~game-mode-hint"
   />
