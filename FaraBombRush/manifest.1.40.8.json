@@ -3,7 +3,7 @@
   "id": "FaraBombRush",
   "name": "FaraBombRush",
   "author": "Fara",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Add !bomb, !bombline, !bombreset",
   "gameVersion": "1.40.8",
   "dependsOn": {
