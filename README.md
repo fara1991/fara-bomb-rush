@@ -47,7 +47,7 @@ Position numbers (`<1-12>`):
 | 9 to 12 | Bottom row, from the left (bottom left, bottom middle left, bottom middle right, bottom right) |
 
 - Without a number, the position is picked at random, uniformly from the 10 positions above.
-- `!bombline` spawns 5 bombs at the same position, one beat apart.
+- `!bombline` spawns 5 bombs at the same position, 1 m apart in the lane (almost touching), regardless of BPM. Auto mode lines use the same spacing.
 - `!bombreset` spawns 4 bombs at the same time across one row. Position 5 (center left) and the top positions reset the **top row**. Position 8 (center right) and the bottom positions reset the **bottom row**. For 6, 7 or no number, the row depends on the random position (top 5 of 10 positions, bottom 5 of 10).
 - Numbers outside 1 to 12 (for example `0` or `13`) and anything that is not a number do not spawn a bomb.
 
@@ -119,3 +119,13 @@ Output: `dist\FaraBombRush-v1.1.0-BS1.29.1.zip`, `dist\FaraBombRush-v1.1.0-BS1.4
 ## License
 
 Copyright (c) Fara 2024
+
+## Tests
+
+The pure logic that does not need the game (chat command parser, bomb line spacing, ScoreSaber PP parsing) is tested without game DLLs:
+
+```
+dotnet test FaraBombRush.Tests/FaraBombRush.Tests.csproj
+```
+
+If the PP shown in the settings screen cannot be loaded, the hint says so, and the reason (HTTP status, exception) is written to the IPA log.

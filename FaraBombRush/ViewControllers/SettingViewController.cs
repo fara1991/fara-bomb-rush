@@ -18,14 +18,27 @@ internal class SettingViewController : BSMLAutomaticViewController
 {
     private PluginConfig _config;
     private MenuBombPreviewService _previewService;
-    private readonly FaraBombLevelEnum _playerLevelEnum = FaraBombLevelEnumHelper.GetLevelEnum();
-    private readonly float _playerPP = LoadSteamController.ScoreSaberPP;
 
     [Inject]
     private void Construct(PluginConfig config, MenuBombPreviewService previewService)
     {
         _config = config;
         _previewService = previewService;
+
+        // PP は設定画面を作った後に取得が終わることがあるので、取得が終わったら表示を描き直す
+        LoadSteamController.Changed -= OnScoreSaberChanged;
+        LoadSteamController.Changed += OnScoreSaberChanged;
+    }
+
+    protected override void OnDestroy()
+    {
+        LoadSteamController.Changed -= OnScoreSaberChanged;
+        base.OnDestroy();
+    }
+
+    private void OnScoreSaberChanged()
+    {
+        NotifyPropertyChanged(nameof(RecommendLevel));
     }
 
     private string L(string en, string ja) => UiText.Pick(_config?.Language, en, ja);
@@ -66,9 +79,33 @@ internal class SettingViewController : BSMLAutomaticViewController
     public string BombCutHint => L("Choose whether bombs can be hit", "ボムに当たり判定を付けるかを選びます");
 
     [UIValue("player-recommend-level")]
-    public string RecommendLevel => L(
-        $"Calculate the recommended level using ScoreSaber's PP. Now ScoreSaber PP is {_playerPP}.\nYour recommended level is [{_playerLevelEnum}].",
-        $"ScoreSaber の PP から推奨レベルを計算します。現在の PP は {_playerPP} です。\n推奨レベルは [{_playerLevelEnum}] です。");
+    public string RecommendLevel
+    {
+        get
+        {
+            var pp = LoadSteamController.ScoreSaberPP;
+            var level = FaraBombLevelEnumHelper.GetLevelEnum();
+            switch (LoadSteamController.State)
+            {
+                case ScoreSaberLoadState.Loaded:
+                    return L(
+                        $"Calculate the recommended level using ScoreSaber's PP. Now ScoreSaber PP is {pp:0.##}.\nYour recommended level is [{level}].",
+                        $"ScoreSaber の PP から推奨レベルを計算します。現在の PP は {pp:0.##} です。\n推奨レベルは [{level}] です。");
+                case ScoreSaberLoadState.NotRegistered:
+                    return L(
+                        "Could not get the PP: no ScoreSaber account was found for this Steam account.\nThe recommended level is unknown.",
+                        "PP を取得できませんでした（この Steam アカウントの ScoreSaber 登録が見つかりません）。\n推奨レベルは不明です。");
+                case ScoreSaberLoadState.Failed:
+                    return L(
+                        "Could not get the PP from ScoreSaber (see the log for details).\nThe recommended level is unknown.",
+                        "ScoreSaber から PP を取得できませんでした（詳細はログを参照）。\n推奨レベルは不明です。");
+                default:
+                    return L(
+                        "Loading the PP from ScoreSaber...\nThe recommended level is unknown yet.",
+                        "ScoreSaber から PP を取得しています…\n推奨レベルはまだ不明です。");
+            }
+        }
+    }
 
     private void NotifyAllTextChanged()
     {

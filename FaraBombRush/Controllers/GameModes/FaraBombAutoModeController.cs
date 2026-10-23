@@ -125,6 +125,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
             case FaraBombCreatePatternEnum.BombLineDouble:
             case FaraBombCreatePatternEnum.BombLineTriple:
                 {
+                    var lineSpacingSeconds = GetBombLineSpacingSeconds();
                     endPos = FaraBombCreatePatternEnumHelper.GetPatternIndex(pattern.ToString()) - 3;
                     for (var i = startPos; i < endPos; i++)
                     {
@@ -133,7 +134,7 @@ internal class FaraBombAutoModeController : FaraBombGameModeBaseController
 
                         for (var j = 0; j < 5; j++)
                         {
-                            float lineHitTime = hitTime + (BombLineDiffBeat * j * _beatInterval);
+                            float lineHitTime = hitTime + (lineSpacingSeconds * j);
                             bombCommandListModel.Add(new BombCommandModel
                             {
                                 BombId = bombId,

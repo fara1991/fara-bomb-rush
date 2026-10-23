@@ -80,13 +80,14 @@ internal class FaraBombInteractiveModeController : FaraBombGameModeBaseControlle
             case BombChatCommandKind.Line:
                 {
                     var commands = new List<BombCommandModel>();
+                    var lineSpacingSeconds = GetBombLineSpacingSeconds();
                     for (var i = 0; i < 5; i++)
                     {
                         commands.Add(new BombCommandModel
                         {
                             BombId = bombId,
                             PositionIndex = notePositionEnum.GetValue(),
-                            HitTime = hitTime + (BombLineDiffBeat * i * (60f / Bpm))
+                            HitTime = hitTime + (lineSpacingSeconds * i)
                         });
                     }
                     EnqueueBombCommands(commands);
