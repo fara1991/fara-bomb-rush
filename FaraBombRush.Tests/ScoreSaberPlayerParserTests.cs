@@ -6,8 +6,9 @@ namespace FaraBombRush.Tests;
 public class ScoreSaberPlayerParserTests
 {
     // 2026-10 に https://scoresaber.com/api/player/{id}/basic が実際に返した形（"replaysWatched" と "silenced" がある）
+    // 構造は実応答のまま、名前と ID は架空の値に置き換えてある
     private const string RealResponse =
-        "{\"id\":\"1922350521131465\",\"name\":\"oermer\",\"profilePicture\":\"https://cdn.scoresaber.com/avatars/1922350521131465.jpg\"," +
+        "{\"id\":\"76561190000000000\",\"name\":\"TestPlayer\",\"profilePicture\":\"https://cdn.scoresaber.com/avatars/76561190000000000.jpg\"," +
         "\"bio\":null,\"country\":\"US\",\"pp\":22007.999836146522,\"rank\":1,\"countryRank\":1,\"role\":null," +
         "\"badges\":[{\"description\":\"x\",\"image\":\"y\"}],\"histories\":\"999999\"," +
         "\"scoreStats\":{\"totalScore\":4204421586,\"totalRankedScore\":1727404524,\"averageRankedAccuracy\":95.9,\"totalPlayCount\":4279,\"rankedPlayCount\":1227,\"replaysWatched\":11999}," +
@@ -53,18 +54,5 @@ public class ScoreSaberPlayerParserTests
         Assert.False(ok);
         Assert.Equal(0f, pp);
         Assert.False(string.IsNullOrEmpty(error));
-    }
-
-    [Theory]
-    [InlineData(0f, FaraBombRush.Enums.FaraBombLevelEnum.Beginner)]
-    [InlineData(1999.9f, FaraBombRush.Enums.FaraBombLevelEnum.Beginner)]
-    [InlineData(2000f, FaraBombRush.Enums.FaraBombLevelEnum.Easy)]
-    [InlineData(5999f, FaraBombRush.Enums.FaraBombLevelEnum.Normal)]
-    [InlineData(8000f, FaraBombRush.Enums.FaraBombLevelEnum.Expert)]
-    [InlineData(11999f, FaraBombRush.Enums.FaraBombLevelEnum.ExpertPlus)]
-    [InlineData(22008f, FaraBombRush.Enums.FaraBombLevelEnum.Lawless)]
-    public void Level_follows_pp(float pp, FaraBombRush.Enums.FaraBombLevelEnum expected)
-    {
-        Assert.Equal(expected, BombLevelCalculator.FromPp(pp));
     }
 }

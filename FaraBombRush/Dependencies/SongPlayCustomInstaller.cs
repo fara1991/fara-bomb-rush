@@ -20,7 +20,8 @@ public class SongPlayCustomInstaller : Installer
 
     public override void InstallBindings()
     {
-        if (!_config.IsEnabled) return;
+        // None と未実装の Battle は何も起動しない（システム管理もチャット読み取りも作らない）
+        if (!_config.IsEnabled || !GameModeEnumHelper.RunsMod(_config.GameMode)) return;
 
         Container.BindInterfacesAndSelfTo<FaraBombSystemManager>()
             .FromNewComponentOnNewGameObject()
@@ -42,19 +43,15 @@ public class SongPlayCustomInstaller : Installer
         // Play Mode
         Container.BindInterfacesAndSelfTo<FaraBombGameModeBaseController>().FromNewComponentOnNewGameObject().AsCached()
             .NonLazy();
-        if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Interactive.ToString())
+        if (GameModeEnumHelper.Normalize(_config.GameMode) == nameof(GameModeEnum.Interactive))
         {
             Container.BindInterfacesAndSelfTo<FaraBombInteractiveModeController>().FromNewComponentOnNewGameObject()
                 .AsCached().NonLazy();
         }
-        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Auto.ToString())
+        else
         {
             Container.BindInterfacesAndSelfTo<FaraBombAutoModeController>().FromNewComponentOnNewGameObject().AsCached()
                 .NonLazy();
-        }
-        else if (GameModeEnumHelper.Normalize(_config.GameMode) == GameModeEnum.Battle.ToString())
-        {
-            // 後で実装
         }
     }
 }
